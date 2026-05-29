@@ -1,0 +1,12 @@
+{
+    "id": "win-003",
+    "instruction": "Open File Explorer and navigate to Documents folder",
+    "category": "file_management",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "always_pass"},
+    "max_steps": 6,
+    "timeout_seconds": 30,
+    "tags": ["explorer", "navigation", "basic"]
+}

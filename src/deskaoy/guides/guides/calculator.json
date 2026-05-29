@@ -1,0 +1,39 @@
+{
+    "name": "Calculator",
+    "process_names": ["Calculator.exe", "calc.exe", "win32calc.exe"],
+    "selectors": {
+        "display": "auto:CalculatorResults",
+        "button_0": "name:num0Button",
+        "button_1": "name:num1Button",
+        "button_2": "name:num2Button",
+        "button_3": "name:num3Button",
+        "button_4": "name:num4Button",
+        "button_5": "name:num5Button",
+        "button_6": "name:num6Button",
+        "button_7": "name:num7Button",
+        "button_8": "name:num8Button",
+        "button_9": "name:num9Button",
+        "button_plus": "name:plusButton",
+        "button_minus": "name:minusButton",
+        "button_multiply": "name:multiplyButton",
+        "button_divide": "name:divideButton",
+        "button_equals": "name:equalButton",
+        "button_clear": "name:clearButton"
+    },
+    "workflows": {
+        "add": [
+            {"action": "click", "target": "name:num{n1}Button"},
+            {"action": "click", "target": "name:plusButton"},
+            {"action": "click", "target": "name:num{n2}Button"},
+            {"action": "click", "target": "name:equalButton"}
+        ]
+    },
+    "safety_notes": [
+        "Calculator is read-only — no destructive operations possible"
+    ],
+    "tips": [
+        "Use keyboard shortcuts for faster input",
+        "Display value is in CalculatorResults automation ID"
+    ],
+    "version": "1.0"
+}

@@ -1,0 +1,29 @@
+{
+    "name": "Chrome",
+    "process_names": ["chrome.exe", "chrome"],
+    "selectors": {
+        "address_bar": "auto:address",
+        "tab_bar": "name:Browser tabs",
+        "content_area": "auto:content"
+    },
+    "workflows": {
+        "navigate": [
+            {"action": "key_press", "key": "ctrl+l"},
+            {"action": "wait", "seconds": 0.2},
+            {"action": "type_text", "text": "{url}"},
+            {"action": "key_press", "key": "Enter"}
+        ],
+        "new_tab": [
+            {"action": "key_press", "key": "ctrl+t"}
+        ]
+    },
+    "safety_notes": [
+        "Browser may have saved passwords — sensitive app",
+        "Downloads may contain executables — scan before running"
+    ],
+    "tips": [
+        "Use Ctrl+L to focus address bar reliably",
+        "Browser is better automated through CDP than UIA"
+    ],
+    "version": "1.0"
+}

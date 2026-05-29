@@ -1,0 +1,26 @@
+{
+    "name": "File Explorer",
+    "process_names": ["explorer.exe", "explorer"],
+    "selectors": {
+        "address_bar": "auto:1001",
+        "file_list": "auto:1",
+        "navigation_pane": "auto:1003"
+    },
+    "workflows": {
+        "navigate_to": [
+            {"action": "click", "target": "auto:1001"},
+            {"action": "wait", "seconds": 0.3},
+            {"action": "type_text", "text": "{path}"},
+            {"action": "key_press", "key": "Enter"}
+        ]
+    },
+    "safety_notes": [
+        "File Explorer can delete files — confirm before delete operations",
+        "Shift+Delete bypasses recycle bin — blocked by key_blocklist"
+    ],
+    "tips": [
+        "Use auto:1001 for the address bar",
+        "Ctrl+L also focuses the address bar"
+    ],
+    "version": "1.0"
+}

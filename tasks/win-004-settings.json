@@ -1,0 +1,12 @@
+{
+    "id": "win-004",
+    "instruction": "Open the Windows Settings app",
+    "category": "system",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "process_running", "name": "SystemSettings.exe"},
+    "max_steps": 5,
+    "timeout_seconds": 20,
+    "tags": ["settings", "system", "basic"]
+}

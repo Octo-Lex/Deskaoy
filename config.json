@@ -1,0 +1,18 @@
+{
+  "id": "ws_dd7fc8bb",
+  "name": "Desktop-Agent",
+  "slug": "desktop-agent",
+  "defaults": {
+    "permissionMode": "safe",
+    "cyclablePermissionModes": [
+      "safe",
+      "allow-all"
+    ],
+    "enabledSourceSlugs": []
+  },
+  "localMcpServers": {
+    "enabled": true
+  },
+  "createdAt": 1777162016475,
+  "updatedAt": 1777162016482
+}

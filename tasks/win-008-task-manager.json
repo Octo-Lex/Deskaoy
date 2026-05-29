@@ -1,0 +1,12 @@
+{
+    "id": "win-008",
+    "instruction": "Open Task Manager using Ctrl+Shift+Esc keyboard shortcut",
+    "category": "system",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "process_running", "name": "Taskmgr.exe"},
+    "max_steps": 4,
+    "timeout_seconds": 20,
+    "tags": ["task-manager", "keyboard", "shortcut"]
+}

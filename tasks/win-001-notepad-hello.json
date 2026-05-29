@@ -1,0 +1,12 @@
+{
+    "id": "win-001",
+    "instruction": "Open Notepad and type Hello World",
+    "category": "text_editing",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "process_running", "name": "notepad.exe"},
+    "max_steps": 5,
+    "timeout_seconds": 30,
+    "tags": ["notepad", "typing", "basic"]
+}

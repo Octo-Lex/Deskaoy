@@ -1,0 +1,35 @@
+{
+    "name": "Notepad",
+    "process_names": ["notepad.exe", "notepad"],
+    "selectors": {
+        "text_area": "auto:15",
+        "menu_file": "name:File",
+        "menu_edit": "name:Edit",
+        "menu_save": "name:Save",
+        "menu_open": "name:Open"
+    },
+    "workflows": {
+        "new_file": [
+            {"action": "key_press", "key": "ctrl+n"},
+            {"action": "wait", "seconds": 0.5}
+        ],
+        "save_file": [
+            {"action": "key_press", "key": "ctrl+s"},
+            {"action": "wait", "seconds": 1.0}
+        ],
+        "type_text": [
+            {"action": "click", "target": "auto:15"},
+            {"action": "wait", "seconds": 0.2},
+            {"action": "type_text", "text": "{content}"}
+        ]
+    },
+    "safety_notes": [
+        "Notepad has no auto-save — unsaved content may be lost",
+        "Ctrl+N will close current unsaved content if not saved"
+    ],
+    "tips": [
+        "Use auto:15 for the main text area (Text Editor)",
+        "File dialog may appear on save — handle with care"
+    ],
+    "version": "1.0"
+}

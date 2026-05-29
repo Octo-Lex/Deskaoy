@@ -1,0 +1,12 @@
+{
+    "id": "win-010",
+    "instruction": "Minimize all windows using Win+D keyboard shortcut",
+    "category": "window_management",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "always_pass"},
+    "max_steps": 3,
+    "timeout_seconds": 15,
+    "tags": ["minimize", "keyboard", "shortcut", "windows"]
+}

@@ -1,0 +1,12 @@
+{
+    "id": "win-009",
+    "instruction": "Click on the Windows search box and type 'notepad'",
+    "category": "text_editing",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "always_pass"},
+    "max_steps": 6,
+    "timeout_seconds": 20,
+    "tags": ["search", "typing", "windows"]
+}

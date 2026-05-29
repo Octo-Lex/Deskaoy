@@ -1,0 +1,12 @@
+{
+    "id": "win-007",
+    "instruction": "Take a screenshot of the current desktop",
+    "category": "system",
+    "difficulty": "trivial",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "always_pass"},
+    "max_steps": 3,
+    "timeout_seconds": 15,
+    "tags": ["screenshot", "system", "basic"]
+}

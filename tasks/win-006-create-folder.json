@@ -1,0 +1,12 @@
+{
+    "id": "win-006",
+    "instruction": "Create a new folder on the Desktop named TestFolder",
+    "category": "file_management",
+    "difficulty": "medium",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "file_exists", "path": "%USERPROFILE%\\Desktop\\TestFolder"},
+    "max_steps": 10,
+    "timeout_seconds": 45,
+    "tags": ["folder", "desktop", "file_management"]
+}

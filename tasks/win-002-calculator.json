@@ -1,0 +1,12 @@
+{
+    "id": "win-002",
+    "instruction": "Open Calculator and compute 2+2",
+    "category": "utility",
+    "difficulty": "easy",
+    "platform": "windows",
+    "setup": [],
+    "evaluator": {"type": "process_running", "name": "Calculator.exe"},
+    "max_steps": 8,
+    "timeout_seconds": 30,
+    "tags": ["calculator", "math", "basic"]
+}

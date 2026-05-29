@@ -1,0 +1,30 @@
+{
+    "name": "VS Code",
+    "process_names": ["Code.exe", "code"],
+    "selectors": {
+        "editor": "auto:Editor",
+        "terminal": "name:Terminal",
+        "sidebar": "name:Side Bar",
+        "command_palette": "name:Quick Open"
+    },
+    "workflows": {
+        "open_command_palette": [
+            {"action": "key_press", "key": "ctrl+shift+p"}
+        ],
+        "open_file": [
+            {"action": "key_press", "key": "ctrl+p"}
+        ],
+        "open_terminal": [
+            {"action": "key_press", "key": "ctrl+`"}
+        ]
+    },
+    "safety_notes": [
+        "Terminal can execute arbitrary commands — sensitive app",
+        "Code may have unsaved changes — be careful with close"
+    ],
+    "tips": [
+        "Use keyboard shortcuts extensively — VS Code has excellent keyboard support",
+        "Command palette is the fastest way to access any feature"
+    ],
+    "version": "1.0"
+}
