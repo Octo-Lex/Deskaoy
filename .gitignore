@@ -18,3 +18,4 @@ venv/
 .nul
 sessions/
 views.json
+events.jsonl
