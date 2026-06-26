@@ -27,7 +27,6 @@ import contextlib
 import difflib
 import json
 import logging
-import os
 import sys
 import uuid
 from pathlib import Path
@@ -766,14 +765,14 @@ async def _cmd_doctor(args: argparse.Namespace) -> int:
 
     # Check 13: Validation module
     try:
-        from deskaoy.validation import validate_instruction
+        from deskaoy.validation import validate_instruction  # noqa: F401
         checks.append(("Instruction validation", True, "available"))
     except ImportError:
         checks.append(("Instruction validation", False, "import error"))
 
     # Check 14: Cascade engine
     try:
-        from deskaoy.cascade.protocol import SurfaceAdapter
+        from deskaoy.cascade.protocol import SurfaceAdapter  # noqa: F401
         checks.append(("Cascade engine", True, "SurfaceAdapter protocol"))
     except ImportError:
         checks.append(("Cascade engine", False, "import error"))
