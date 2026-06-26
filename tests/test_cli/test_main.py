@@ -342,13 +342,16 @@ class TestStorageDir:
 
     def test_default_storage_dir(self):
         sd = _resolve_storage_dir()
-        assert ".aios" in sd or "AIOS" in sd
+        # StorageResolver delegates to ~/.deskaoy-dev (dev mode) or
+        # $AIOS_HOME/capabilities/aios.first_party.deskaoy (production).
+        assert "deskaoy" in sd.lower()
 
     def test_env_storage_dir(self):
         import os
         with patch.dict(os.environ, {"AIOS_HOME": "/custom/aios"}):
             sd = _resolve_storage_dir()
-        assert sd.replace("\\", "/") == "/custom/aios/deskaoy"
+        # Now delegates to StorageResolver: $AIOS_HOME/capabilities/<capability_id>
+        assert sd.replace("\\", "/") == "/custom/aios/capabilities/aios.first_party.deskaoy"
 
 
 # ---------------------------------------------------------------------------

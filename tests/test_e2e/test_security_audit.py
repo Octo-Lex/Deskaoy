@@ -99,13 +99,21 @@ class TestCLIInputValidation:
     """Verify CLI inputs are sanitized."""
 
     def test_cli_instruction_rejected_when_empty(self):
-        """execute subcommand requires non-empty instruction."""
-        from deskaoy.cli.main import _build_parser
+        """execute automate with no instruction must fail.
+
+        Since instruction is now optional (nargs='?') to support single-action
+        capabilities like `--capability click --target X`, the empty-instruction
+        check moved from argparse to _build_goal, which raises SystemExit for
+        automate without an instruction.
+        """
+        from deskaoy.cli.main import _build_parser, _build_goal
 
         parser = _build_parser()
-        # No instruction arg → argparse error
+        # Parsing succeeds (instruction is optional)
+        args = parser.parse_args(["execute"])
+        # But _build_goal must reject automate without instruction
         with pytest.raises(SystemExit):
-            parser.parse_args(["execute"])
+            _build_goal(args)
 
     def test_cli_timeout_accepts_positive_int(self):
         """Timeout must be a positive integer."""

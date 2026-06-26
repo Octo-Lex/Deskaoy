@@ -45,13 +45,19 @@ _storage_dir: str | None = None
 
 
 def _resolve_storage_dir(storage_dir: str | None = None) -> str:
-    """Resolve storage directory from arg, env, or default."""
+    """Resolve storage directory from arg, env, or default.
+
+    Delegates to :class:`deskaoy.storage.StorageResolver` so the CLI uses the
+    same path logic as the runtime:
+      - ``$AIOS_HOME/capabilities/aios.first_party.deskaoy/`` in production
+      - ``~/.deskaoy-dev/`` in dev mode (``DESKTOP_AGENT_DEV=1``)
+
+    An explicit ``storage_dir`` argument always wins (for testing/overrides).
+    """
     if storage_dir:
         return storage_dir
-    env_dir = os.environ.get("AIOS_HOME")
-    if env_dir:
-        return os.path.join(env_dir, "deskaoy")
-    return os.path.join(os.path.expanduser("~"), ".aios", "deskaoy")
+    from deskaoy.storage import StorageResolver
+    return str(StorageResolver().capability_root)
 
 
 def _get_agent(storage_dir: str | None = None) -> Any:
@@ -85,9 +91,83 @@ def _reset_agent() -> None:
 # Subcommand handlers
 # ---------------------------------------------------------------------------
 
+def _build_goal(args: argparse.Namespace):
+    """Build an AgentGoal from CLI args, honoring --capability.
+
+    Maps each capability to the correct parameter schema:
+
+    - ``automate``: ``instruction`` → ``params.instruction``
+    - ``click``: ``--target`` or positional → ``params.target``
+    - ``fill``: ``--target``/positional + ``--value`` → ``params.target``, ``params.value``
+    - ``type_text``: ``--value`` or positional → ``params.text``
+    - ``key_press``: ``--value`` or positional → ``params.key``
+    - ``scroll``: ``--value`` or positional → ``params.direction``
+    - ``navigate``: ``--value`` or positional → ``params.url``
+
+    Capabilities without an explicit CLI mapping (e.g. ``screenshot``,
+    ``snapshot``, ``orchestrate``) raise a clear error rather than producing
+    wrong ``target`` params.
+    """
+    from deskaoy.os_types import AgentGoal
+
+    capability = args.capability
+    instruction = args.instruction
+    target = args.target
+    value = args.value
+
+    if capability == "automate":
+        if not instruction:
+            raise SystemExit("execute automate requires an instruction")
+        return AgentGoal(
+            capability="automate",
+            params={"instruction": instruction},
+        )
+
+    if capability == "click":
+        resolved = target or instruction
+        if not resolved:
+            raise SystemExit("execute --capability click requires --target or positional target")
+        return AgentGoal(capability="click", params={"target": resolved})
+
+    if capability == "fill":
+        resolved_target = target or instruction
+        if not resolved_target or value is None:
+            raise SystemExit("execute --capability fill requires --target/positional target and --value")
+        return AgentGoal(capability="fill", params={"target": resolved_target, "value": value})
+
+    if capability == "type_text":
+        text = value or instruction
+        if not text:
+            raise SystemExit("execute --capability type_text requires --value or positional text")
+        return AgentGoal(capability="type_text", params={"text": text})
+
+    if capability == "key_press":
+        key = value or instruction
+        if not key:
+            raise SystemExit("execute --capability key_press requires --value or positional key")
+        return AgentGoal(capability="key_press", params={"key": key})
+
+    if capability == "scroll":
+        direction = value or instruction
+        if not direction:
+            raise SystemExit("execute --capability scroll requires --value or positional direction")
+        return AgentGoal(capability="scroll", params={"direction": direction})
+
+    if capability == "navigate":
+        url = value or instruction
+        if not url:
+            raise SystemExit("execute --capability navigate requires --value or positional URL")
+        return AgentGoal(capability="navigate", params={"url": url})
+
+    raise SystemExit(
+        f"execute does not support CLI parameter mapping for capability: {capability}. "
+        f"Supported: automate, click, fill, type_text, key_press, scroll, navigate"
+    )
+
+
 async def _cmd_execute(args: argparse.Namespace) -> int:
     """Execute a natural-language instruction."""
-    from deskaoy.os_types import AgentContext, AgentGoal, CancellationToken
+    from deskaoy.os_types import AgentContext, CancellationToken
 
     # HB-01: Visual feedback is opt-in only
     if getattr(args, 'visual_feedback', False):
@@ -111,7 +191,7 @@ async def _cmd_execute(args: argparse.Namespace) -> int:
             timeout_seconds=args.timeout,
             cancellation_token=CancellationToken(),
         )
-        goal = AgentGoal(capability="automate", params={"instruction": args.instruction})
+        goal = _build_goal(args)
         result = await daemon_client.execute(goal, ctx)
         await daemon_client.close()
         from deskaoy.cli.formatters import format_result
@@ -133,7 +213,7 @@ async def _cmd_execute(args: argparse.Namespace) -> int:
         cancellation_token=CancellationToken(),
     )
 
-    goal = AgentGoal(capability="automate", params={"instruction": args.instruction})
+    goal = _build_goal(args)
     result = await agent.execute(goal, ctx)
 
     from deskaoy.cli.formatters import format_result
@@ -225,7 +305,7 @@ async def _cmd_schedule_due(args: argparse.Namespace) -> int:
         return 0
 
     for r in due:
-        print(f"  {r.name}: {r.instruction}")
+        print(f"  {r.name}: {r.prompt}")
     return 0
 
 
@@ -947,10 +1027,17 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", help="Available commands")
 
     # execute
-    p_exec = sub.add_parser("execute", help="Execute a natural-language instruction")
-    p_exec.add_argument("instruction", help="Instruction to execute")
+    p_exec = sub.add_parser("execute", help="Execute a natural-language instruction or single action")
+    p_exec.add_argument(
+        "instruction",
+        nargs="?",
+        default=None,
+        help="Instruction (automate), target (click/fill), or value (type_text/key_press/scroll/navigate)",
+    )
     p_exec.add_argument("--dry-run", action="store_true", help="Preview without executing")
     p_exec.add_argument("--capability", default="automate", help="Capability to use (default: automate)")
+    p_exec.add_argument("--target", default=None, help="Target element for single-action capabilities (click, fill, etc.)")
+    p_exec.add_argument("--value", default=None, help="Value for fill/type_text capabilities")
     p_exec.add_argument("--visual-feedback", action="store_true", help="Enable visual feedback overlay (click ripples, trails)")
     p_exec.add_argument("--daemon", action="store_true", help="Route execution through daemon (persistent DesktopAgent)")
 
