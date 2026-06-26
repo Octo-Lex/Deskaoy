@@ -7,10 +7,20 @@ Uses the mock pattern from BATCH-33-BLUEPRINT:
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+# These tests mock pyobjc and patch sys.platform to 'darwin'. On GitHub Actions
+# Windows runners this causes thread/signal crashes because the production code
+# exercises macOS-specific signal behavior that Windows cannot emulate.
+pytestmark = pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true" and sys.platform == "win32",
+    reason="macOS adapter mock tests crash on GitHub Actions Windows runners "
+           "(signal/thread incompatibility when sys.platform is patched to darwin)",
+)
 
 from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.cascade.types import AXSnapshot
