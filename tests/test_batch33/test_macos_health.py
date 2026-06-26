@@ -7,10 +7,17 @@ Verifies that the macOS adapter health check returns:
 """
 from __future__ import annotations
 
+import os
 import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+pytestmark = pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true" and sys.platform == "win32",
+    reason="macOS adapter mock tests crash on GitHub Actions Windows runners "
+           "(thread/signal incompatibility when sys.platform is patched to darwin)",
+)
 
 from deskaoy.safety.health import HealthCheck
 
