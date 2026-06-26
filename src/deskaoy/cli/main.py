@@ -716,9 +716,9 @@ async def _cmd_doctor(args: argparse.Namespace) -> int:
 
 
 async def _cmd_release_check(args: argparse.Namespace) -> int:
-    """v1.0 Release Candidate readiness check.
+    """Release readiness check.
 
-    Checks all criteria for a v1.0 release:
+    Checks all criteria for a release:
     1. Version consistency across 3 single-source files
     2. All tests pass (requires pytest)
     3. Package builds cleanly
@@ -745,7 +745,7 @@ async def _cmd_release_check(args: argparse.Namespace) -> int:
         with open(project_root / "pyproject.toml", "rb") as f:
             pyproject_ver = tomllib.load(f)["project"]["version"]
         from deskaoy.desktop_agent import DesktopAgent
-        da_ver = DesktopAgent.__dataclass_fields__["version"].default
+        da_ver = DesktopAgent.version
         ver_ok = cli_ver == pyproject_ver == da_ver
         checks.append(("Version consistency", ver_ok, f"cli={cli_ver} pyproject={pyproject_ver} agent={da_ver}"))
         if not ver_ok:
@@ -835,25 +835,25 @@ async def _cmd_release_check(args: argparse.Namespace) -> int:
     # Check 10: CLI basic commands work
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "deskaoy.cli.main", "--version"],
+            [sys.executable, "-m", "deskaoy.cli.main", "version"],
             capture_output=True, text=True, cwd=str(project_root), timeout=10,
         )
         cli_ok = result.returncode == 0
-        checks.append(("CLI --version", cli_ok, result.stdout.strip()))
+        checks.append(("CLI version", cli_ok, result.stdout.strip()))
         if not cli_ok:
             issues += 1
     except Exception as e:
-        checks.append(("CLI --version", False, str(e)))
+        checks.append(("CLI version", False, str(e)))
         issues += 1
 
     # Print results
-    print("\ndeskaoy v1.0 Release Readiness Check\n")
+    print("\ndeskaoy Release Readiness Check\n")
     for label, ok, detail in checks:
         icon = "[OK]" if ok else "[FAIL]"
         print(f"  {icon} {label:30s} {detail}")
     print()
     if issues == 0:
-        print("  READY FOR v1.0 RELEASE.\n")
+        print("  READY FOR RELEASE.\n")
         return 0
     else:
         print(f"  {issues} issue(s) must be fixed before release.\n")
@@ -996,7 +996,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("schema", help="Print capability schema (alias for describe)")
     sub.add_parser("version", help="Print version")
     sub.add_parser("doctor", help="Diagnose environment setup issues")
-    sub.add_parser("release-check", help="v1.0 release readiness check")
+    sub.add_parser("release-check", help="release readiness check")
     sub.add_parser("status", help="Show configured subsystems and dependencies")
 
     # snapshot (BATCH-24)
@@ -1409,7 +1409,7 @@ async def _cmd_docs(args: argparse.Namespace) -> int:
     import webbrowser
 
     project_root = Path(__file__).resolve().parent.parent.parent.parent
-    docs_base = "https://github.com/example/deskaoy"
+    docs_base = "https://github.com/Octo-Lex/Deskaoy"
 
     doc_map = {
         "readme": (project_root / "README.md", f"{docs_base}/blob/main/README.md"),

@@ -10,11 +10,39 @@
 pip install deskaoy
 ```
 
-```python
-from deskaoy import DesktopAgent
+The fastest way to try it is the CLI:
 
-agent = DesktopAgent()
-result = await agent.execute("Open Notepad and type Hello World")
+```bash
+deskaoy execute --dry-run "Open Notepad and type Hello World"
+```
+
+Or programmatically — `execute()` takes an `AgentGoal` and an `AgentContext`:
+
+```python
+import asyncio
+from uuid import uuid4
+
+from deskaoy import DesktopAgent
+from deskaoy.os_types import AgentGoal, AgentContext
+
+async def main():
+    agent = DesktopAgent()
+    goal = AgentGoal(
+        capability="automate",
+        params={"instruction": "Open Notepad and type Hello World"},
+    )
+    ctx = AgentContext(
+        execution_id=str(uuid4()),
+        idempotency_key=str(uuid4()),
+        task_id=str(uuid4()),
+        user_id="demo-user",
+        session_id=str(uuid4()),
+        timeout_seconds=60,
+    )
+    result = await agent.execute(goal, ctx)
+    print(result.status, result.summary)
+
+asyncio.run(main())
 ```
 
 ## Features

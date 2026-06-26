@@ -29,9 +29,9 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Elephant-Rock-Lab/deskaoy"
-Documentation = "https://github.com/Elephant-Rock-Lab/deskaoy#readme"
-Changelog = "https://github.com/Elephant-Rock-Lab/deskaoy/blob/main/CHANGELOG.md"
+Repository = "https://github.com/Octo-Lex/Deskaoy"
+Documentation = "https://github.com/Octo-Lex/Deskaoy#readme"
+Changelog = "https://github.com/Octo-Lex/Deskaoy/blob/main/CHANGELOG.md"
 
 [project.scripts]
 deskaoy = "deskaoy.cli.main:main"

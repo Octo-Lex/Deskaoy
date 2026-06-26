@@ -15,6 +15,7 @@ import logging
 import time
 from typing import Any
 
+from deskaoy._version import resolve_version
 from deskaoy.hooks import HookContext, HookName
 from deskaoy.hooks import hooks as global_hooks
 from deskaoy.memory.fact_extractor import FactExtractor
@@ -318,7 +319,7 @@ class DesktopAgent:
         "Automates desktop interactions: clicking, typing, scrolling, "
         "and multi-step workflows across native applications."
     )
-    version: str = "2.0.0"  # Single-source: keep in sync with pyproject.toml
+    version: str = resolve_version()  # from installed metadata, fallback to constant
     domains: list[str] = ["desktop_automation"]
 
     # ─── Capabilities ────────────────────────────
