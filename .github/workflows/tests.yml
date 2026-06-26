@@ -33,7 +33,7 @@ jobs:
           else
             pip install -e ".[dev,tracing]"
           fi
-          pip install numpy Pillow hypothesis opentelemetry-exporter-otlp
+          pip install numpy Pillow hypothesis opentelemetry-exporter-otlp prometheus_client
         shell: bash
 
       # Note: the browser/Patchright/Chromium install step was removed in the
