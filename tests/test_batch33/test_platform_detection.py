@@ -54,7 +54,7 @@ class TestCreateAdapterFactory:
     """create_adapter() returns the right adapter for the platform."""
 
     def test_create_adapter_macos(self):
-        """On macOS with pyobjc, returns MacOSAdapter."""
+        """On macOS with pyobjc and opt-in, returns MacOSAdapter."""
         macos_modules = {
             'ApplicationServices': MagicMock(),
             'CoreGraphics': MagicMock(),
@@ -62,17 +62,19 @@ class TestCreateAdapterFactory:
         }
         with patch.dict('sys.modules', macos_modules):
             with patch('sys.platform', 'darwin'):
-                adapter = Environment.create_adapter(pid=100)
-                assert adapter is not None
-                assert hasattr(adapter, 'click')
-                assert hasattr(adapter, 'screenshot')
+                with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
+                    adapter = Environment.create_adapter(pid=100)
+                    assert adapter is not None
+                    assert hasattr(adapter, 'click')
+                    assert hasattr(adapter, 'screenshot')
 
     def test_create_adapter_macos_missing_pyobjc_raises_on_use(self):
         """MacOSAdapter can be created but methods fail without pyobjc."""
         with patch('sys.platform', 'darwin'):
-            adapter = Environment.create_adapter(pid=100)
-            with pytest.raises(ImportError, match="requires macOS|requires pyobjc"):
-                asyncio.run(adapter.screenshot())
+            with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
+                adapter = Environment.create_adapter(pid=100)
+                with pytest.raises(ImportError, match="requires macOS|requires pyobjc"):
+                    asyncio.run(adapter.screenshot())
 
     def test_create_adapter_unsupported_platform(self):
         """FreeBSD should raise ImportError."""
@@ -96,9 +98,10 @@ class TestCreateAdapterFactory:
         }
         with patch.dict('sys.modules', macos_modules):
             with patch('sys.platform', 'darwin'):
-                adapter = Environment.create_adapter(pid=42, bundle_id="com.test")
-                assert adapter._pid == 42
-                assert adapter._bundle_id == "com.test"
+                with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
+                    adapter = Environment.create_adapter(pid=42, bundle_id="com.test")
+                    assert adapter._pid == 42
+                    assert adapter._bundle_id == "com.test"
 
 
 class TestLazyImport:

@@ -12,8 +12,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from deskaoy.cascade.types import AXSnapshot
-from deskaoy.results.types import ActionResult
-
 
 # ---------------------------------------------------------------------------
 # Fixtures: mock AT-SPI2 modules
@@ -228,7 +226,8 @@ class TestLinuxAdapterFill:
         assert result.ok is True
         assert result.data.get("dry_run") is True
 
-    def test_fill_click_and_type(self):
+    def test_fill_returns_unsupported(self):
+        """fill delegates to type_text which is not yet implemented."""
         LinuxAdapter = _import_adapter()
         adapter = LinuxAdapter()
         adapter._ensure_imports()
@@ -239,8 +238,9 @@ class TestLinuxAdapterFill:
         adapter._atspi.get_desktop.return_value = desktop
 
         result = asyncio.run(adapter.fill("field", "hello"))
-        assert result.ok is True
-        assert result.data.get("value") == "hello"
+        # fill calls type_text which is unsupported — must fail honestly
+        assert result.ok is False
+        assert "unsupported" in str(result.error.category).lower()
 
 
 class TestLinuxAdapterTypeText:
@@ -253,12 +253,12 @@ class TestLinuxAdapterTypeText:
         assert result.ok is True
         assert result.data.get("dry_run") is True
 
-    def test_type_text_returns_ok(self):
+    def test_type_text_returns_unsupported(self):
+        """type_text is not yet implemented — must fail honestly."""
         LinuxAdapter = _import_adapter()
         adapter = LinuxAdapter()
-        adapter._ensure_imports()
         result = asyncio.run(adapter.type_text("hello"))
-        assert result.ok is True
+        assert result.ok is False
 
 
 class TestLinuxAdapterKeyPress:

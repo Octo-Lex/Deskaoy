@@ -17,6 +17,7 @@ Platform detection (BATCH-33):
 from __future__ import annotations
 
 import logging
+import os
 import platform
 import sys
 from abc import ABC, abstractmethod
@@ -121,6 +122,15 @@ class Environment(ABC):
             ImportError: If the required platform dependencies are missing.
         """
         if sys.platform == "darwin":
+            # macOS adapter exists but is experimental — the CGEvent/Quartz
+            # code paths are untested without macOS hardware. Do not silently
+            # select it; require explicit opt-in via DESKTOP_AGENT_MACOS=1.
+            if os.environ.get("DESKTOP_AGENT_MACOS", "").lower() not in ("1", "true", "yes"):
+                raise ImportError(
+                    "macOS adapter is experimental and untested without macOS "
+                    "hardware. To opt in, set DESKTOP_AGENT_MACOS=1 and install "
+                    "pyobjc-framework-ApplicationServices pyobjc-framework-Quartz."
+                )
             try:
                 from deskaoy.adapters.macos import MacOSAdapter
                 return MacOSAdapter(**kwargs)
