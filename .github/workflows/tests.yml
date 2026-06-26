@@ -29,11 +29,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ "$RUNNER_OS" = "Windows" ]; then
-            pip install -e ".[windows,dev]"
+            pip install -e ".[windows,dev,tracing]"
           else
-            pip install -e ".[dev]"
+            pip install -e ".[dev,tracing]"
           fi
-          pip install numpy Pillow
+          pip install numpy Pillow hypothesis
         shell: bash
 
       # Note: the browser/Patchright/Chromium install step was removed in the
