@@ -111,6 +111,16 @@ class TestReadmeQuickStart:
             f"README appears to call execute() with a bare string at: {bad.group(0)!r}"
         )
 
+    def test_quick_start_uses_dry_run_for_default_agent(self):
+        # The quick start constructs DesktopAgent() with no surface/LLM and
+        # calls execute() with capability="automate". Without dry_run=True
+        # this returns failure ("No agent loop or LLM configured"). The
+        # snippet must be a dry-run smoke test so it actually succeeds.
+        assert "dry_run=True" in README, (
+            "README quick start must set dry_run=True — without an LLM/surface "
+            "the default-agent automate path otherwise fails on first run"
+        )
+
 
 # ---------------------------------------------------------------------------
 # 3. No stale repository URLs

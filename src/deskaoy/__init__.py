@@ -14,7 +14,7 @@ the internal engine behind the platform contract.
 from deskaoy._version import resolve_version
 
 # Resolve from installed package metadata when available; fall back to the
-# hardcoded constant in source checkouts. See cli/version.py.
+# hardcoded constant in source checkouts. See deskaoy._version.
 __version__ = resolve_version()
 
 # AI-OS contract types — the boundary between agent and platform

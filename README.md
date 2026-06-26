@@ -16,7 +16,7 @@ The fastest way to try it is the CLI:
 deskaoy execute --dry-run "Open Notepad and type Hello World"
 ```
 
-Or programmatically — `execute()` takes an `AgentGoal` and an `AgentContext`:
+Or programmatically — `execute()` takes an `AgentGoal` and an `AgentContext`. This snippet runs as a **dry-run smoke test** (no real desktop action) so it works without an LLM or surface configured:
 
 ```python
 import asyncio
@@ -37,6 +37,7 @@ async def main():
         task_id=str(uuid4()),
         user_id="demo-user",
         session_id=str(uuid4()),
+        dry_run=True,  # smoke test — no real desktop action
         timeout_seconds=60,
     )
     result = await agent.execute(goal, ctx)
