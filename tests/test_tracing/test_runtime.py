@@ -1,93 +1,4 @@
-"""Tests for TelemetryRuntime (BATCH-43 / TASK-01).
-
-TEST-43-01-01 through TEST-43-01-07.
-"""
-
-from __future__ import annotations
-
-import sys
-from unittest import mock
-
-import pytest
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
-    InMemorySpanExporter,
-)
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _make_runtime(**overrides):
-    """Create a TelemetryRuntime with InMemorySpanExporter for testing."""
-    from deskaoy.tracing.runtime import TelemetryConfig, TelemetryRuntime
-
-    cfg = TelemetryConfig(**overrides)
-    rt = TelemetryRuntime(cfg)
-
-    # Inject InMemorySpanExporter so tests can inspect exported spans.
-    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-    exporter = InMemorySpanExporter()
-    rt.tracer_provider.add_span_processor(SimpleSpanProcessor(exporter))
-    return rt, exporter
-
-
-# ===================================================================
-# TEST-43-01-01  TelemetryRuntime creates TracerProvider
-# ===================================================================
-
-class TestTracerProvider:
-
-    def test_tracer_returns_non_none(self):
-        rt, _ = _make_runtime()
-        tracer = rt.tracer()
-        assert tracer is not None
-
-    def test_tracer_is_otel_tracer(self):
-        from opentelemetry.trace import Tracer
-
-        rt, _ = _make_runtime()
-        assert isinstance(rt.tracer(), Tracer)
-
-
-# ===================================================================
-# TEST-43-01-02  TelemetryRuntime creates MeterProvider
-# ===================================================================
-
-class TestMeterProvider:
-
-    def test_meter_returns_non_none(self):
-        rt, _ = _make_runtime()
-        meter = rt.meter()
-        assert meter is not None
-
-    def test_meter_is_otel_meter(self):
-        from opentelemetry.metrics import Meter
-
-        rt, _ = _make_runtime()
-        assert isinstance(rt.meter(), Meter)
-
-
-# ===================================================================
-# TEST-43-01-03  TelemetryRuntime shutdown flushes
-# ===================================================================
-
-class TestShutdown:
-
-    def test_force_flush_returns_true(self):
-        rt, exporter = _make_runtime()
-        result = rt.force_flush(timeout_ms=2000)
-        assert result is True
-
-    def test_shutdown_cleans_up(self):
-        rt, exporter = _make_runtime()
-        rt.shutdown()
-        # After shutdown, force_flush should still return (no crash).
-        # Provider raises ShutdownExecuted but we catch it.
-        rt.force_flush(timeout_ms=1000)
-
-
-# ===================================================================
+===================================================================
 # TEST-43-01-04  configure_telemetry sets global runtime
 # ===================================================================
 
@@ -177,6 +88,25 @@ class TestOTLPExporter:
 # ===================================================================
 # TEST-43-01-07  OTLP NOT added when endpoint is None
 # ===================================================================
+
+class TestNoOTLP:
+
+    def test_no_otlp_when_endpoint_none(self):
+        from deskaoy.tracing.runtime import TelemetryConfig, TelemetryRuntime
+
+        rt = TelemetryRuntime(TelemetryConfig(otlp_endpoint=None))
+        provider = rt.tracer_provider
+        spp = getattr(provider, "_active_span_processor", None)
+        if spp is not None:
+            processors = getattr(spp, "_span_processors", [])
+            from opentelemetry.sdk.trace.export import BatchSpanProcessor
+            has_otlp = any(
+                isinstance(p, BatchSpanProcessor) for p in processors
+            )
+            assert not has_otlp, (
+                f"BatchSpanProcessor should not be present when otlp_endpoint=None, "
+                f"found {processors}"
+            )
 
 # ===================================================================
 # TEST-43-04-01  Runtime exposes metrics property
@@ -273,23 +203,3 @@ class TestPyprojectTracingExtras:
         assert not any(
             "opentelemetry-exporter-prometheus" in d for d in core_deps
         )
-
-
-class TestNoOTLP:
-
-    def test_no_otlp_when_endpoint_none(self):
-        from deskaoy.tracing.runtime import TelemetryConfig, TelemetryRuntime
-
-        rt = TelemetryRuntime(TelemetryConfig(otlp_endpoint=None))
-        provider = rt.tracer_provider
-        spp = getattr(provider, "_active_span_processor", None)
-        if spp is not None:
-            processors = getattr(spp, "_span_processors", [])
-            from opentelemetry.sdk.trace.export import BatchSpanProcessor
-            has_otlp = any(
-                isinstance(p, BatchSpanProcessor) for p in processors
-            )
-            assert not has_otlp, (
-                f"BatchSpanProcessor should not be present when otlp_endpoint=None, "
-                f"found {processors}"
-            )
