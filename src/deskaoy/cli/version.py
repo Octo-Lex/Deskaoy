@@ -1,10 +1,13 @@
-"""Single source of truth for the deskaoy version.
+"""CLI version constants.
 
-Uses the hardcoded constant as the primary source, since the installed
-package version may lag behind the source tree during development.
-The constant is updated automatically during release builds.
+Re-exported from :mod:`deskaoy._version` (the neutral source). The CLI may
+depend on core; core must never depend on the CLI, so the canonical resolver
+lives in ``deskaoy._version`` and is simply re-exported here for the CLI's
+own use.
 """
 
 from __future__ import annotations
 
-VERSION = "2.0.0"
+from deskaoy._version import VERSION, resolve_version
+
+__all__ = ["VERSION", "resolve_version"]

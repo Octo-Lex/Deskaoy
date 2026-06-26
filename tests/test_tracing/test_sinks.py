@@ -4,6 +4,8 @@ import asyncio
 import json
 from pathlib import Path
 
+import pytest
+
 from deskaoy.tracing.session_db import SessionDB
 from deskaoy.tracing.sinks import (
     ConsoleSink,
@@ -22,6 +24,14 @@ def _make_event(**kwargs) -> TraceEvent:
     )
     defaults.update(kwargs)
     return TraceEvent(**defaults)
+
+
+def _has_prometheus() -> bool:
+    try:
+        import prometheus_client  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 class TestConsoleSink:
@@ -111,6 +121,10 @@ class TestSQLiteSink:
         asyncio.run(_test())
 
 
+@pytest.mark.skipif(
+    not _has_prometheus(),
+    reason="prometheus_client not installed — PrometheusSink degrades to noop",
+)
 class TestPrometheusSink:
     def test_graceful_noop(self):
         async def _test():

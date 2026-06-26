@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from deskaoy._version import resolve_version
+
 # ---------------------------------------------------------------------------
 # Capability Manifest
 # ---------------------------------------------------------------------------
@@ -16,14 +18,13 @@ CAPABILITY_MANIFEST: dict[str, Any] = {
     # ── Identity ──────────────────────────────────
     "capability_id": "aios.first_party.deskaoy",
     "name": "Deskaoy",
-    "version": "2.0.0",
+    "version": resolve_version(),
     "publisher": "aios",
     "capability_type": "agent",
 
     # ── Domains ────────────────────────────────────
     "domains": [
         "desktop_automation",
-        "browser_automation",
     ],
 
     # ── Entrypoint ─────────────────────────────────

@@ -29,17 +29,13 @@ class TestVersionBump:
         """All single-source files agree on the same version."""
         from deskaoy.cli.version import VERSION as cli_ver
         from deskaoy.desktop_agent import DesktopAgent
+        import deskaoy
 
         with open(_PROJECT_ROOT / "pyproject.toml", "rb") as f:
             pyproject_ver = tomllib.load(f)["project"]["version"]
 
         da_ver = DesktopAgent.version
-        init_ver = None
-        with open(_PROJECT_ROOT / "src" / "deskaoy" / "__init__.py", "r", encoding="utf-8") as f:
-            for line in f:
-                if line.startswith("__version__"):
-                    init_ver = line.split('"')[1]
-                    break
+        init_ver = deskaoy.__version__
 
         assert cli_ver == pyproject_ver == da_ver == init_ver, (
             f"Version mismatch: cli={cli_ver}, pyproject={pyproject_ver}, "

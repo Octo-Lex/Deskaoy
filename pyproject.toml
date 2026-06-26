@@ -29,9 +29,9 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Elephant-Rock-Lab/deskaoy"
-Documentation = "https://github.com/Elephant-Rock-Lab/deskaoy#readme"
-Changelog = "https://github.com/Elephant-Rock-Lab/deskaoy/blob/main/CHANGELOG.md"
+Repository = "https://github.com/Octo-Lex/Deskaoy"
+Documentation = "https://github.com/Octo-Lex/Deskaoy#readme"
+Changelog = "https://github.com/Octo-Lex/Deskaoy/blob/main/CHANGELOG.md"
 
 [project.scripts]
 deskaoy = "deskaoy.cli.main:main"
@@ -49,6 +49,7 @@ rest = [
 ]
 windows = [
     "pyautogui>=0.9",
+    "pywin32>=306; platform_system == 'Windows'",
     "comtypes>=1.4",
     "mss>=10.0",
     "Pillow>=10.0",

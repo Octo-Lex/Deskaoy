@@ -31,16 +31,8 @@ class TestVersionConsistency:
         import tomllib
         with open(PROJECT_ROOT / "pyproject.toml", "rb") as f:
             pyproject_ver = tomllib.load(f)["project"]["version"]
-        # DesktopAgent stores version as a field, read from the module
-        import inspect
-        src = inspect.getsource(__import__("deskaoy.desktop_agent", fromlist=["DesktopAgent"]))
-        # Find version line in source
-        for line in src.split("\n"):
-            if "version" in line and "=" in line and "str" in line:
-                da_ver = line.split('"')[1]
-                break
-        else:
-            da_ver = None
+        from deskaoy.desktop_agent import DesktopAgent
+        da_ver = DesktopAgent.version
         assert da_ver == pyproject_ver, f"agent={da_ver} != pyproject={pyproject_ver}"
 
 

@@ -8,11 +8,18 @@ All mocked — no real OS APIs or hardware required.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+pytestmark = pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true" and sys.platform == "win32",
+    reason="macOS adapter mock tests crash on GitHub Actions Windows runners "
+           "(thread/signal incompatibility when sys.platform is patched to darwin)",
+)
 
 from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.cascade.types import AXNode, AXSnapshot

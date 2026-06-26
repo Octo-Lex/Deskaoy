@@ -155,7 +155,7 @@ class TestDaemonClientDescribe:
         client = DaemonClient(auto_start=False, fallback=True)
         desc = client.describe()
         assert isinstance(desc, dict)
-        assert desc.get("name") == "desktop_agent"
+        assert desc.get("name") == "deskaoy"
 
 
 # ---------------------------------------------------------------------------

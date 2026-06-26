@@ -15,6 +15,7 @@ import logging
 import time
 from typing import Any
 
+from deskaoy._version import resolve_version
 from deskaoy.hooks import HookContext, HookName
 from deskaoy.hooks import hooks as global_hooks
 from deskaoy.memory.fact_extractor import FactExtractor
@@ -40,7 +41,7 @@ from deskaoy.os_types import (
 )
 from deskaoy.pipeline.executor import PipelineExecutor
 from deskaoy.pipeline.registry import PipelineRegistry
-from deskaoy.policy import PolicyBridge, PolicyEffect
+from deskaoy.policy import PolicyBridge, PolicyDecision, PolicyEffect
 from deskaoy.recovery_bridge import RecoveryBridge
 from deskaoy.result_mapper import map_action_result
 from deskaoy.results.types import ActionResult
@@ -318,7 +319,7 @@ class DesktopAgent:
         "Automates desktop interactions: clicking, typing, scrolling, "
         "and multi-step workflows across native applications."
     )
-    version: str = "2.0.0"  # Single-source: keep in sync with pyproject.toml
+    version: str = resolve_version()  # from installed metadata, fallback to constant
     domains: list[str] = ["desktop_automation"]
 
     # ─── Capabilities ────────────────────────────
@@ -917,6 +918,10 @@ class DesktopAgent:
         policy_decision = await self._policy_bridge.preflight(
             goal.capability, context=getattr(context, "execution_id", "")
         )
+        # A policy override from self-evolution. Only ALLOW_ONCE sets this;
+        # execution below proceeds iff the *final* policy_decision is non-DENY
+        # OR an explicit override was granted. Denial must never fall through.
+        policy_override_allowed = False
         if policy_decision.effect == PolicyEffect.DENY:
             # ── Wire 1b: Policy self-evolution (det-acp pattern) ──
             suggestion = self._policy_evolution.suggest(goal.capability, policy_decision.reason)
@@ -929,43 +934,20 @@ class DesktopAgent:
                         goal.capability, context=getattr(context, "execution_id", "")
                     )
                     if policy_decision.effect == PolicyEffect.DENY:
-                        # Still denied after evolution — return failure
-                        pass
-                    else:
-                        # Evolution worked — continue to execution
-                        pass  # Fall through to normal execution below
+                        # Still denied after evolution — hard stop.
+                        # (Previously fell through to execution via an empty
+                        # `pass`; that was a P0 safety fallthrough.)
+                        return self._policy_denied_result(context, policy_decision)
+                    # Evolution worked — re-check allowed; fall through to execution.
                 elif result.decision == EvolutionDecision.ALLOW_ONCE:
                     logger.info("Policy evolution: one-time override for '%s'", goal.capability)
-                    # Skip the deny — continue to execution below
+                    policy_override_allowed = True
                 else:
-                    # User chose to keep the denial
-                    if policy_decision.effect == PolicyEffect.DENY:
-                        return AgentResult(
-                            execution_id=context.execution_id,
-                            status=ResultStatus.FAILURE,
-                            summary=f"Action blocked by policy: {policy_decision.reason}",
-                            data={"policy_decision_id": policy_decision.policy_decision_id},
-                            confidence=Confidence(score=0.0, reason="Policy denied"),
-                            issues=[Issue(
-                                severity=IssueSeverity.ERROR,
-                                code=ErrorCode.PERMISSION_DENIED,
-                                message=policy_decision.reason,
-                            )],
-                        )
+                    # User chose to keep the denial — hard stop.
+                    return self._policy_denied_result(context, policy_decision)
             else:
                 # No suggestion possible — hard deny
-                return AgentResult(
-                    execution_id=context.execution_id,
-                    status=ResultStatus.FAILURE,
-                    summary=f"Action blocked by policy: {policy_decision.reason}",
-                    data={"policy_decision_id": policy_decision.policy_decision_id},
-                    confidence=Confidence(score=0.0, reason="Policy denied"),
-                    issues=[Issue(
-                        severity=IssueSeverity.ERROR,
-                        code=ErrorCode.PERMISSION_DENIED,
-                        message=policy_decision.reason,
-                    )],
-                )
+                return self._policy_denied_result(context, policy_decision)
         if policy_decision.effect == PolicyEffect.ASK:
             return AgentResult(
                 execution_id=context.execution_id,
@@ -976,6 +958,14 @@ class DesktopAgent:
             )
         if policy_decision.effect == PolicyEffect.ALLOW_DRY_RUN_ONLY:
             return self._dry_run_result(context, goal, CAPABILITIES.get(goal.capability, {}))
+
+        # ── Defense-in-depth: invariant gate before any execution ──
+        # Every DENY path above must hard-return; this guard ensures that even
+        # if a future edit accidentally lets a DENY fall through, execution is
+        # still blocked. The only way past a DENY is an explicit ALLOW_ONCE
+        # override granted by policy self-evolution.
+        if policy_decision.effect == PolicyEffect.DENY and not policy_override_allowed:
+            return self._policy_denied_result(context, policy_decision)
 
         # ── Wire 8: Action parameter validation (OSWorld pattern) ──
         validation = validate_action(goal.capability, dict(goal.params))
@@ -1041,8 +1031,11 @@ class DesktopAgent:
         before_state = await self._capture_surface_state()
         context.cancellation_token.check()
 
-        # Execute the adapter method (with timeout → receipt)
-        params = dict(goal.params)
+        # Execute the adapter method (with timeout → receipt).
+        # NOTE: dispatch uses `validation.sanitized_params`, NOT raw `goal.params`.
+        # The sanitized params have been type-coerced, defaults applied, and
+        # disallowed keys stripped. Re-reading goal.params here was a P0 safety
+        # regression (validated/sanitized values were discarded before dispatch).
         try:
             action_result: ActionResult = await asyncio.wait_for(
                 adapter_method(**params),
@@ -1715,6 +1708,30 @@ class DesktopAgent:
                 code=ErrorCode.VALIDATION_ERROR,
                 message=f"Unknown capability '{goal.capability}'. "
                         f"Available: {', '.join(self.capabilities)}",
+            )],
+        )
+
+    def _policy_denied_result(
+        self,
+        context: AgentContext,
+        policy_decision: PolicyDecision,
+    ) -> AgentResult:
+        """Construct a failure result for a policy denial.
+
+        Centralised so every denial path (no suggestion, kept denial, or
+        re-denial after failed self-evolution) returns an identical result
+        shape and never falls through to execution.
+        """
+        return AgentResult(
+            execution_id=context.execution_id,
+            status=ResultStatus.FAILURE,
+            summary=f"Action blocked by policy: {policy_decision.reason}",
+            data={"policy_decision_id": policy_decision.policy_decision_id},
+            confidence=Confidence(score=0.0, reason="Policy denied"),
+            issues=[Issue(
+                severity=IssueSeverity.ERROR,
+                code=ErrorCode.PERMISSION_DENIED,
+                message=policy_decision.reason,
             )],
         )
 

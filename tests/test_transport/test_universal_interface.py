@@ -14,6 +14,8 @@ import json
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 
+import deskaoy
+from deskaoy import __version__
 from deskaoy.desktop_agent import DesktopAgent, CAPABILITIES, CAPABILITY_NAMES
 from deskaoy.manifest import CAPABILITY_MANIFEST, validate_manifest
 
@@ -83,9 +85,9 @@ class TestDescribe:
         self.desc = self.agent.describe()
 
     def test_has_identity(self):
-        assert self.desc["name"] == "desktop_agent"
-        assert self.desc["display_name"] == "Desktop Agent"
-        assert self.desc["version"] == "1.1.0"
+        assert self.desc["name"] == "deskaoy"
+        assert self.desc["display_name"] == "Deskaoy"
+        assert self.desc["version"] == __version__
         assert self.desc["schema_version"] == 1
 
     def test_has_description(self):
@@ -94,7 +96,6 @@ class TestDescribe:
 
     def test_has_domains(self):
         assert "desktop_automation" in self.desc["domains"]
-        assert "browser_automation" in self.desc["domains"]
 
     def test_has_transports(self):
         transports = self.desc["transports"]
@@ -140,7 +141,7 @@ class TestDescribe:
 
     def test_has_aios_identity(self):
         aios = self.desc["aios"]
-        assert aios["capability_id"] == "aios.first_party.desktop_agent"
+        assert aios["capability_id"] == "aios.first_party.deskaoy"
         assert aios["capability_type"] == "agent"
         assert aios["entrypoint"] == "deskaoy.desktop_agent:DesktopAgent"
 
@@ -158,7 +159,7 @@ class TestDescribe:
         assert len(serialized) > 100
         # Round-trip
         parsed = json.loads(serialized)
-        assert parsed["name"] == "desktop_agent"
+        assert parsed["name"] == "deskaoy"
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +174,7 @@ class TestManifest:
         assert errors == [], f"Manifest validation errors: {errors}"
 
     def test_manifest_version_matches_agent(self):
-        assert CAPABILITY_MANIFEST["version"] == "1.1.0"
+        assert CAPABILITY_MANIFEST["version"] == __version__
 
     def test_manifest_has_required_keys(self):
         required = {"capability_id", "name", "version", "publisher", "capability_type",
@@ -222,8 +223,8 @@ class TestRESTDiscovery:
             resp = await cli.get("/")
             assert resp.status == 200
             data = await resp.json()
-            assert data["name"] == "desktop_agent"
-            assert data["version"] == "1.1.0"
+            assert data["name"] == "deskaoy"
+            assert data["version"] == __version__
             assert "capabilities" in data
             assert "input" in data["capabilities"]["click"]
 
@@ -234,7 +235,7 @@ class TestRESTDiscovery:
             resp = await cli.get("/capabilities")
             assert resp.status == 200
             data = await resp.json()
-            assert data["name"] == "desktop_agent"
+            assert data["name"] == "deskaoy"
 
     @pytest.mark.asyncio
     async def test_health_endpoint(self, app):
@@ -274,7 +275,7 @@ class TestMCPDescribe:
         response = await self.server.handle_request(request)
         assert response["id"] == 1
         result = response["result"]
-        assert result["name"] == "desktop_agent"
+        assert result["name"] == "deskaoy"
         assert "capabilities" in result
         assert "input" in result["capabilities"]["click"]
 
@@ -390,10 +391,10 @@ class TestVersionNegotiation:
         assert desc["schema_version"] == 1
 
     def test_manifest_includes_version(self):
-        assert CAPABILITY_MANIFEST["version"] == "1.1.0"
+        assert CAPABILITY_MANIFEST["version"] == __version__
 
     def test_agent_version_matches(self):
         agent = DesktopAgent()
-        assert agent.version == "1.1.0"
+        assert agent.version == __version__
         desc = agent.describe()
-        assert desc["version"] == "1.1.0"
+        assert desc["version"] == __version__

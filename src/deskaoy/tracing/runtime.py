@@ -6,9 +6,11 @@ All OTel SDK imports are lazy (inside ``__init__``) so that importing
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from deskaoy._version import resolve_version as _resolve_version
 
 if TYPE_CHECKING:
     from opentelemetry.metrics import Meter
@@ -26,7 +28,7 @@ class TelemetryConfig:
     """Configuration for :class:`TelemetryRuntime`."""
 
     service_name: str = "deskaoy"
-    service_version: str = "1.1.0"
+    service_version: str = field(default_factory=_resolve_version)
     otlp_endpoint: str | None = None  # opt-in — never defaults to a URL
     otlp_headers: dict[str, str] | None = None
     prometheus_port: int | None = None
