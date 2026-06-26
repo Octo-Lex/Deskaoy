@@ -9,6 +9,7 @@ All tests mock comtypes UIA patterns — no real Windows COM needed.
 from __future__ import annotations
 
 import asyncio
+import os
 import re
 import sys
 from typing import Any, Optional
@@ -18,10 +19,18 @@ import pytest
 
 # These tests exercise Windows UIA patterns via comtypes mocks.
 # They cannot run on Linux/macOS because the comtypes runtime is Windows-only.
-pytestmark = pytest.mark.skipif(
-    sys.platform != "win32",
-    reason="Windows UIA/comtypes tests",
-)
+pytestmark = [
+    pytest.mark.skipif(
+        sys.platform != "win32",
+        reason="Windows UIA/comtypes tests",
+    ),
+    pytest.mark.skipif(
+        os.getenv("GITHUB_ACTIONS") == "true",
+        reason="comtypes.gen.UIAutomationClient type library is not pre-generated "
+               "on GitHub Actions Windows runners; these tests need a real desktop "
+               "session or pre-generated comtypes module",
+    ),
+]
 
 from deskaoy.adapters.uia_walker import (
     PatternActionResult,
