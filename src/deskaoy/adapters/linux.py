@@ -246,36 +246,28 @@ class LinuxAdapter(SurfaceAdapter):
     ) -> ActionResult:
         """Fill a text field via AT-SPI2 Value/Text interface.
 
-        Falls back to click + type if AT-SPI2 interface fails.
-        """
-        self._ensure_imports()
+        .. warning::
 
+           The AT-SPI2 text injection path is **not yet wired** (it would
+           delegate to :meth:`type_text`, which is unsupported). Returns
+           ``ok=False`` with an ``UNSUPPORTED`` error **before performing
+           any side effects** — no click is executed. ``dry_run`` still
+           works for previewing.
+        """
         if dry_run:
             return action_result(ok=True, data={
                 "action": "fill", "target": target,
                 "value": value, "dry_run": True,
             })
 
-        try:
-            # Click target first
-            click_result = await self.click(target)
-            if not click_result.ok:
-                return click_result
-
-            # Type the value
-            type_result = await self.type_text(value)
-            if not type_result.ok:
-                return type_result
-
-            return action_result(ok=True, data={
-                "value": value,
-                "method": "atspi_text",
-            })
-        except Exception as exc:
-            return action_result(
-                ok=False,
-                error=ActionError(ErrorCategory.UNKNOWN, str(exc)),
-            )
+        return action_result(
+            ok=False,
+            error=ActionError(
+                ErrorCategory.UNSUPPORTED,
+                "fill is not yet implemented for Linux — no safe text "
+                "injection backend is wired. Use dry_run=True to preview.",
+            ),
+        )
 
     # ------------------------------------------------------------------
     # Keyboard actions
@@ -287,25 +279,28 @@ class LinuxAdapter(SurfaceAdapter):
     ) -> ActionResult:
         """Type text via AT-SPI2 editable text interface.
 
-        Falls back to xdotool/keyboard injection.
-        """
-        self._ensure_imports()
+        .. warning::
 
+           The AT-SPI2 editable-text injection path is **not yet wired**.
+           Until a real injection backend (AT-SPI2 ``EditableText`` or
+           ``xdotool``) is implemented, this method returns ``ok=False``
+           with an ``UNSUPPORTED`` error rather than silently claiming
+           success. The ``dry_run`` path still works for previewing.
+        """
         if dry_run:
             return action_result(ok=True, data={
                 "action": "type_text", "char_count": len(text), "dry_run": True,
             })
 
-        try:
-            return action_result(ok=True, data={
-                "text": text,
-                "method": "atspi_editable_text",
-            })
-        except Exception as exc:
-            return action_result(
-                ok=False,
-                error=ActionError(ErrorCategory.UNKNOWN, str(exc)),
-            )
+        return action_result(
+            ok=False,
+            error=ActionError(
+                ErrorCategory.UNSUPPORTED,
+                "type_text is not yet implemented for Linux — "
+                "no AT-SPI2 EditableText or xdotool injection backend is wired. "
+                "Use dry_run=True to preview.",
+            ),
+        )
 
     async def key_press(
         self, key: str, modifiers: int = 0, *,
@@ -314,10 +309,15 @@ class LinuxAdapter(SurfaceAdapter):
         """Press a key with optional modifiers.
 
         Checks key blocklist before executing.
-        """
-        self._ensure_imports()
 
-        # SECURITY: Check key blocklist
+        .. warning::
+
+           The AT-SPI2 keyboard injection path is **not yet wired**.
+           Returns ``ok=False`` with an ``UNSUPPORTED`` error rather than
+           silently claiming success. The key blocklist is still checked,
+           and ``dry_run`` still works for previewing.
+        """
+        # SECURITY: Check key blocklist (pure Python, no AT-SPI2 needed)
         from deskaoy.safety.key_blocklist import block_reason, is_blocked_key
         combo = key
         mod_names: list[str] = []
@@ -346,39 +346,43 @@ class LinuxAdapter(SurfaceAdapter):
                 "modifiers": modifiers, "dry_run": True,
             })
 
-        try:
-            return action_result(ok=True, data={
-                "key": key, "modifiers": modifiers,
-                "method": "atspi_keyboard",
-            })
-        except Exception as exc:
-            return action_result(
-                ok=False,
-                error=ActionError(ErrorCategory.UNKNOWN, str(exc)),
-            )
+        return action_result(
+            ok=False,
+            error=ActionError(
+                ErrorCategory.UNSUPPORTED,
+                "key_press is not yet implemented for Linux — "
+                "no AT-SPI2 keyboard or xdotool injection backend is wired. "
+                "Use dry_run=True to preview.",
+            ),
+        )
 
     async def scroll(
         self, direction: str, amount: int = 500, *,
         dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Scroll in a direction via AT-SPI2 scrollable interface."""
-        self._ensure_imports()
+        """Scroll in a direction via AT-SPI2 scrollable interface.
 
+        .. warning::
+
+           The AT-SPI2 scrollable injection path is **not yet wired**.
+           Returns ``ok=False`` with an ``UNSUPPORTED`` error rather than
+           silently claiming success. ``dry_run`` still works for previewing.
+        """
         if dry_run:
             return action_result(ok=True, data={
                 "action": "scroll", "direction": direction,
                 "amount": amount, "dry_run": True,
             })
 
-        try:
-            return action_result(ok=True, data={
-                "direction": direction, "amount": amount,
-            })
-        except Exception as exc:
-            return action_result(
-                ok=False,
-                error=ActionError(ErrorCategory.UNKNOWN, str(exc)),
-            )
+        return action_result(
+            ok=False,
+            error=ActionError(
+                ErrorCategory.UNSUPPORTED,
+                "scroll is not yet implemented for Linux — "
+                "no AT-SPI2 scrollable injection backend is wired. "
+                "Use dry_run=True to preview.",
+            ),
+        )
 
     # ------------------------------------------------------------------
     # SurfaceAdapter required methods

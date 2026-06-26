@@ -279,7 +279,7 @@ class TestLinuxAdapterE2E:
 
     @pytest.mark.asyncio
     async def test_linux_full_lifecycle(self):
-        """E2E: Create adapter, snapshot, click, type, verify."""
+        """E2E: Create adapter, snapshot, click, verify."""
         adapter = _make_linux_adapter()
 
         # 1. Verify adapter is a SurfaceAdapter
@@ -294,23 +294,23 @@ class TestLinuxAdapterE2E:
         click_result = await adapter.click("300,200")
         assert click_result.ok is True
 
-        # 4. Type text
+        # 4. Type text — unsupported on Linux
         type_result = await adapter.type_text("hello")
-        assert type_result.ok is True
+        assert type_result.ok is False
 
         # 5. Verify URL
         assert adapter.current_url() == "x11://desktop"
 
     @pytest.mark.asyncio
     async def test_linux_fill_lifecycle(self):
-        """E2E: Fill uses click + type."""
+        """E2E: Fill is unsupported on Linux."""
         adapter = _make_linux_adapter()
         result = await adapter.fill("button_name", "test")
-        assert result.ok is True
+        assert result.ok is False
 
     @pytest.mark.asyncio
     async def test_linux_key_press_lifecycle(self):
-        """E2E: Key press succeeds."""
+        """E2E: Key press is unsupported on Linux."""
         adapter = _make_linux_adapter()
         result = await adapter.key_press("enter")
-        assert result.ok is True
+        assert result.ok is False

@@ -29,6 +29,7 @@ class ErrorCategory(StrEnum):
     BROWSER_CRASH = "browser_crash"
     VALIDATION = "validation"
     CONTEXT_OVERFLOW = "context_overflow"
+    UNSUPPORTED = "unsupported"
     UNKNOWN = "unknown"
 
 
