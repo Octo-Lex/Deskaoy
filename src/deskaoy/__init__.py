@@ -45,3 +45,32 @@ from deskaoy.os_types import (
     ToolResult,
     UndoResult,
 )
+
+# Explicit public API surface — these are re-exports, not unused imports.
+__all__ = [
+    "__version__",
+    "DesktopAgent",
+    "AgentContext",
+    "AgentEstimate",
+    "AgentGoal",
+    "AgentResult",
+    "CancellationToken",
+    "Confidence",
+    "ErrorCode",
+    "HealthCheckResult",
+    "Issue",
+    "IssueSeverity",
+    "Learning",
+    "MutationRecord",
+    "OperationCancelled",
+    "PaginatedResult",
+    "ResourceRef",
+    "RestoreMethod",
+    "ResultStatus",
+    "ReviewItem",
+    "Snapshot",
+    "SuggestedFollowup",
+    "ToolContext",
+    "ToolResult",
+    "UndoResult",
+]

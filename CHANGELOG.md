@@ -4,22 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
-## [2.0.0] — 2026-05-29
+## [2.0.0] — 2026-06-27
 
 ### Highlights
 
-**Deskaoy v2.0.0 — Rename and focus.**
+**Desktop-Agent → Deskaoy.** Renamed from Desktop-Agent to **Deskaoy**
+(from the Arabic demonym suffix "-awi" — the one from the desk).
+SuperBrowser has been removed; Deskaoy now focuses exclusively on desktop
+automation. This is a breaking change: package name, module paths, CLI
+command, and filesystem paths have all changed.
 
-Deskaoy has been renamed to **Deskaoy** (from the Arabic demonym suffix "-awi" —
-the one from the desk). SuperBrowser has been removed; Deskaoy now focuses exclusively
-on desktop automation. This is a breaking change: package name, module paths, CLI command,
-and filesystem paths have all changed.
+Six stabilization batches make v2.0.0 production-ready: execution safety,
+release coherence, CI/package correctness, CLI correctness, adapter
+truthfulness, and release hardening.
 
 ### Breaking Changes
-- Package renamed: `deskaoy` → `deskaoy`
+- Project renamed: Desktop-Agent → **Deskaoy**
+- Package / CLI: `desktop-agent` → `deskaoy`
 - Module path: `agent_core` → `deskaoy`
-- CLI: `deskaoy` → `deskaoy`
-- Filesystem paths: `~/.deskaoy/` → `~/.deskaoy/`
+- Filesystem paths: `~/.desktop-agent/` → `~/.deskaoy/`
 - SuperBrowser removed: no more browser automation, `[browser]` extra removed
 - `DesktopAgent.with_browser()` removed
 - `UnifiedSurface` browser routing removed
@@ -28,7 +31,7 @@ and filesystem paths have all changed.
 ```python
 # Before (v1.x)
 from agent_core import DesktopAgent
-pip install deskaoy
+pip install desktop-agent
 
 # After (v2.0)
 from deskaoy import DesktopAgent
@@ -48,12 +51,61 @@ pip install deskaoy
 - `src/agent_core/` → `src/deskaoy/`
 - All imports: `from agent_core.xxx` → `from deskaoy.xxx`
 - OTel namespace: `desktop_agent.*` metrics → `deskaoy.*`
-- Data directory: `~/.deskaoy/` → `~/.deskaoy/`
+- Data directory: `~/.desktop-agent/` → `~/.deskaoy/`
 - Session database: `~/.super-browser/sessions.db` → `~/.deskaoy/sessions.db`
 
-### Test Results
-- Windows: 2,614 passed, 0 failed, 4 skipped
-- Tracing: 163 passed (160 + 3 new middleware wiring tests)
+### Stabilization — Batch 3: Execution Safety (P0)
+- **Preserve sanitized params**: `validate_action()` sanitized params were
+  discarded and overwritten with raw `goal.params` before adapter dispatch. Fixed.
+- **Policy-deny fallthrough**: if policy self-evolution failed to lift a DENY,
+  execution fell through via an empty `pass`. Now hard-returns
+  `PERMISSION_DENIED`. Includes a defense-in-depth invariant gate.
+- Regression tests proving both bugs cannot reappear.
+
+### Stabilization — Batch 1: Release Coherence
+- **Version single-source**: `deskaoy/_version.py` neutral resolver
+  (`importlib.metadata` + fallback). Core never imports from CLI.
+- **README quick start**: accurate `AgentGoal`/`AgentContext` example with
+  `dry_run=True` (was broken `execute("string")`).
+- **URLs**: `Elephant-Rock-Lab` → `Octo-Lex` in pyproject.toml and CLI docs.
+- **release-check**: fixed `__dataclass_fields__` crash, `--version` →
+  `version` subcommand, removed v1.0 wording.
+- **Manifest**: removed stale `browser_automation` domain.
+- 22 coherence tests guarding version, README, URLs, layering, manifest.
+
+### Stabilization — Batch 2: CI/Package Correctness
+- Removed `[browser]` extra from CI (extra was removed in v2.0).
+- Added `pywin32>=306` to `[windows]` extra (adapter imports `win32api`).
+- Added test dependencies: `hypothesis`, `opentelemetry-exporter-otlp`,
+  `prometheus_client`, `tzdata`.
+- Gated integration tests (`if: false`) pending v2 desktop-only rewrite.
+- Narrowed Windows CI scope for thread-crash-sensitive tests.
+- Updated stale test assertions for v2.0 rename.
+
+### Stabilization — Batch 4: CLI Correctness
+- `execute --capability` now honored via schema-aware `_build_goal()`.
+  Supports `automate`, `click`, `fill`, `type_text`, `key_press`, `scroll`,
+  `navigate` with correct param mapping.
+- `schedule due` fixed: `r.instruction` → `r.prompt` (was AttributeError).
+- CLI storage path delegates to `StorageResolver`.
+- Positional `instruction` is now optional (`nargs="?"`).
+
+### Stabilization — Batch 5: Adapter Truthfulness
+- Linux `type_text`, `key_press`, `scroll`, and `fill` now return
+  `ErrorCategory.UNSUPPORTED` instead of fake success.
+- Linux `fill` fails before any side effect (no partial click-then-fail).
+- macOS adapter factory requires explicit `DESKTOP_AGENT_MACOS=1` opt-in.
+- Added `ErrorCategory.UNSUPPORTED` to error taxonomy.
+
+### Stabilization — Batch 6: Release Hardening
+- Added `RELEASE_READINESS.md` with known-debt inventory.
+- `__init__.py` public API re-exports declared via `__all__`.
+- `build>=1.0` added to `[dev]` extra.
+- Mypy and ruff baselines documented as non-blocking for v2.0.0.
+
+### Verification
+- All CI checks green: DCO, Unit Tests (ubuntu/windows, 3.11/3.12), Smoke Tests.
+- ~3000+ tests pass across matrix.
 
 ## [1.2.0] — 2026-05-28
 
