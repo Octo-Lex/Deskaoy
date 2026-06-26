@@ -3,6 +3,18 @@ import pytest
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "integration: requires a real browser")
+    # Disable pyautogui's fail-safe on CI / headless environments.
+    # On GitHub Actions Windows runners (no interactive desktop), pyautogui's
+    # FailSafeThread can raise KeyboardInterrupt when the mouse hits a corner,
+    # killing the entire test process. Disabling it is safe in tests since no
+    # real mouse input is ever injected.
+    import os
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        try:
+            import pyautogui
+            pyautogui.FAILSAFE = False
+        except ImportError:
+            pass
 
 
 def pytest_addoption(parser):
