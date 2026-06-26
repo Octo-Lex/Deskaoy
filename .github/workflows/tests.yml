@@ -28,12 +28,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[browser,dev]"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            pip install -e ".[windows,dev]"
+          else
+            pip install -e ".[dev]"
+          fi
           pip install numpy Pillow
+        shell: bash
 
-      - name: Install Chromium (Linux only)
-        if: runner.os == 'Linux'
-        run: python -m patchright install chromium
+      # Note: the browser/Patchright/Chromium install step was removed in the
+      # v2.0 rename — the SuperBrowser surface is gone and the [browser]
+      # extra no longer exists. Desktop-only test matrix.
 
       - name: Run unit tests
         run: pytest tests/ -q --ignore=tests/integration --ignore=tests/smoke --ignore=tests/benchmarks
@@ -68,10 +73,15 @@ jobs:
       - name: Run benchmarks
         run: pytest tests/benchmarks/ --benchmark-only -v --benchmark-min-rounds=10
 
+  # Integration tests are temporarily disabled. The v2.0 rename removed the
+  # SuperBrowser browser-automation surface, and the existing integration
+  # suite was built around that surface (Patchright/Chromium, browser flows).
+  # Re-enable once integration tests are rewritten for desktop-only automation.
   integration-tests:
-    name: Integration Tests
+    name: Integration Tests (disabled — v2 rewrite pending)
     runs-on: ubuntu-latest
     needs: unit-tests
+    if: false  # gate until integration suite is updated for v2 desktop-only
 
     steps:
       - uses: actions/checkout@v4
@@ -85,11 +95,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[browser,dev]"
+          pip install -e ".[dev]"
           pip install numpy Pillow
-
-      - name: Install Chromium
-        run: python -m patchright install chromium
 
       - name: Run integration tests
         run: pytest tests/integration/ --run-integration -v
