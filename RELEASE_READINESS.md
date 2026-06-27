@@ -30,12 +30,19 @@ pre-generated comtypes module.
 `comtypes.gen` import in the test fixtures. Tracked as Batch 5+ follow-up
 (adapter test hermeticity).
 
-### 2. Integration test suite disabled
+### 2. Integration test suite — partially resolved
 
-The integration suite (`tests/integration/`) was built around the removed
-SuperBrowser browser-automation surface (Patchright/Chromium). The suite is
-gated with `if: false` in CI and will be re-enabled once rewritten for v2
-desktop-only automation.
+Browser-era integration modules (`test_browser_basic.py`,
+`test_verification.py`, `test_recovery_io.py`) have been deleted — they
+were dead code depending on a non-existent conftest and removed CDP APIs.
+
+Hermetic desktop integration tests (`test_desktop_integration.py`) are now
+re-enabled in CI, covering dry-run execution, policy-deny, receipts, and
+CLI goal-capture through the real `DesktopAgent.execute()` stack.
+
+Real-hardware integration tests (`test_real_*.py`,
+`test_desktop_agent_live.py`) remain gated behind `--run-integration` and
+are not run in CI.
 
 ### 3. Linux input injection unsupported
 
