@@ -82,15 +82,15 @@ jobs:
       - name: Run benchmarks
         run: pytest tests/benchmarks/ --benchmark-only -v --benchmark-min-rounds=10
 
-  # Integration tests are temporarily disabled. The v2.0 rename removed the
-  # SuperBrowser browser-automation surface, and the existing integration
-  # suite was built around that surface (Patchright/Chromium, browser flows).
-  # Re-enable once integration tests are rewritten for desktop-only automation.
+  # Hermetic desktop integration tests. These run without --run-integration
+  # and without real hardware — they exercise the real DesktopAgent.execute()
+  # stack through mock surfaces. Real-hardware integration tests (test_real_*.py,
+  # test_desktop_agent_live.py) remain gated behind --run-integration and are
+  # not run in CI.
   integration-tests:
-    name: Integration Tests (disabled — v2 rewrite pending)
+    name: Integration Tests (hermetic desktop)
     runs-on: ubuntu-latest
     needs: unit-tests
-    if: false  # gate until integration suite is updated for v2 desktop-only
 
     steps:
       - uses: actions/checkout@v4
@@ -107,8 +107,5 @@ jobs:
           pip install -e ".[dev]"
           pip install numpy Pillow
 
-      - name: Run integration tests
-        run: pytest tests/integration/ --run-integration -v
-
-      - name: Run full suite
-        run: pytest tests/ --run-integration -q
+      - name: Run hermetic desktop integration tests
+        run: pytest tests/integration/test_desktop_integration.py -v
