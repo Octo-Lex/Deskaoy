@@ -4,33 +4,107 @@ Tests for UIA pattern helpers (TASK-01), find_element_by_element_id (TASK-02),
 action-first WindowsAdapter refactor (TASK-03), and version/validation (TASK-04).
 
 All tests mock comtypes UIA patterns — no real Windows COM needed.
+
+Hermetic comtypes boundary: the production code imports
+``comtypes.gen.UIAutomationClient`` at call time (inside pattern helper
+function bodies). On machines without a pre-generated COM type library
+(e.g. CI runners, dev laptops without comtypes.GetModule), that import
+fails. These tests inject a fake ``comtypes.gen.UIAutomationClient`` module
+into ``sys.modules`` so the pattern helpers succeed without real COM.
 """
 
 from __future__ import annotations
 
 import asyncio
-import os
-import re
 import sys
 from typing import Any, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# These tests exercise Windows UIA patterns via comtypes mocks.
-# They cannot run on Linux/macOS because the comtypes runtime is Windows-only.
-pytestmark = [
-    pytest.mark.skipif(
-        sys.platform != "win32",
-        reason="Windows UIA/comtypes tests",
-    ),
-    pytest.mark.skipif(
-        os.getenv("GITHUB_ACTIONS") == "true",
-        reason="comtypes.gen.UIAutomationClient type library is not pre-generated "
-               "on GitHub Actions Windows runners; these tests need a real desktop "
-               "session or pre-generated comtypes module",
-    ),
-]
+# These tests exercise Windows UIA patterns. They are hermetic (no real COM
+# needed) but are Windows-specific because the production code uses
+# Windows-only module paths.
+pytestmark = pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="Windows UIA/comtypes tests",
+)
+
+
+# ---------------------------------------------------------------------------
+# Hermetic comtypes boundary
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def _fake_comtypes_uia():
+    """Inject a strict fake comtypes boundary into sys.modules.
+
+    The production pattern helpers do:
+        from comtypes.gen.UIAutomationClient import IUIAutomationInvokePattern
+
+    Without a pre-generated COM type library, this import fails. We inject
+    minimal ``ModuleType`` stubs that expose **only** the interface class
+    names the pattern helpers import. Any unexpected COM access
+    (``GetModule``, ``CreateObject``, ``CoCreateInstance``) raises
+    ``AssertionError`` so tests cannot accidentally exercise real COM or
+    receive fabricated truthy objects from a permissive mock.
+
+    Also resets the ``_IUIAWrapper`` singleton so each test gets a fresh
+    COM boundary rather than reusing a cached instance from a prior test.
+    """
+    from types import ModuleType
+
+    from deskaoy.adapters.uia_walker import _IUIAWrapper
+
+    def _unexpected_comtypes_call(*args: Any, **kwargs: Any):
+        raise AssertionError(
+            "Unexpected real COM/comtypes access in hermetic test. "
+            "Tests should mock UIA at the element/adapter boundary, not "
+            "through real COM instantiation."
+        )
+
+    # Minimal interface stubs — only the names the pattern helpers import.
+    class IUIAutomationInvokePattern: ...
+    class IUIAutomationValuePattern: ...
+    class IUIAutomationTogglePattern: ...
+    class IUIAutomationExpandCollapsePattern: ...
+    class IUIAutomationSelectionItemPattern: ...
+    class IUIAutomationScrollItemPattern: ...
+
+    fake_uia = ModuleType("comtypes.gen.UIAutomationClient")
+    fake_uia.IUIAutomationInvokePattern = IUIAutomationInvokePattern
+    fake_uia.IUIAutomationValuePattern = IUIAutomationValuePattern
+    fake_uia.IUIAutomationTogglePattern = IUIAutomationTogglePattern
+    fake_uia.IUIAutomationExpandCollapsePattern = IUIAutomationExpandCollapsePattern
+    fake_uia.IUIAutomationSelectionItemPattern = IUIAutomationSelectionItemPattern
+    fake_uia.IUIAutomationScrollItemPattern = IUIAutomationScrollItemPattern
+
+    fake_gen = ModuleType("comtypes.gen")
+    fake_gen.UIAutomationClient = fake_uia
+
+    fake_client = ModuleType("comtypes.client")
+    fake_client.GetModule = _unexpected_comtypes_call
+    fake_client.CreateObject = _unexpected_comtypes_call
+
+    fake_comtypes = ModuleType("comtypes")
+    fake_comtypes.client = fake_client
+    fake_comtypes.gen = fake_gen
+    fake_comtypes.CoCreateInstance = _unexpected_comtypes_call
+    fake_comtypes.CLSCTX_INPROC_SERVER = 1
+
+    # Reset singleton before and after so tests don't leak COM state
+    original_instance = _IUIAWrapper._instance
+    _IUIAWrapper._instance = None
+
+    with patch.dict(sys.modules, {
+        "comtypes": fake_comtypes,
+        "comtypes.client": fake_client,
+        "comtypes.gen": fake_gen,
+        "comtypes.gen.UIAutomationClient": fake_uia,
+    }):
+        yield
+
+    _IUIAWrapper._instance = original_instance
 
 from deskaoy.adapters.uia_walker import (
     PatternActionResult,
@@ -439,8 +513,12 @@ class TestActionFirstClick:
 
         # Mock _resolve_raw_element to return element without InvokePattern
         mock_raw = _make_raw_element()  # no patterns
+        from deskaoy.input.types import Point
+        valid_point = Point(400, 300)  # within window rect (100,100)-(800,600)
         with patch.object(
             adapter, "_resolve_raw_element", return_value=mock_raw,
+        ), patch.object(
+            adapter, "_resolve_target", return_value=valid_point,
         ):
             result = await adapter.click("name:TestButton")
 
@@ -495,8 +573,12 @@ class TestActionFirstFill:
         adapter = _make_adapter()
 
         mock_raw = _make_raw_element()  # no patterns
+        from deskaoy.input.types import Point
+        valid_point = Point(400, 300)  # within window rect
         with patch.object(
             adapter, "_resolve_raw_element", return_value=mock_raw,
+        ), patch.object(
+            adapter, "_resolve_target", return_value=valid_point,
         ):
             result = await adapter.fill("name:InputField", "hello")
 
