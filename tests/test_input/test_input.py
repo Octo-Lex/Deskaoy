@@ -1,8 +1,5 @@
 """Tests for input module — Bezier curves, jitter, humanization."""
 
-import math
-import random
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -19,7 +16,6 @@ from deskaoy.input.jitter import (
     randomize_rect_center,
 )
 from deskaoy.input.types import HumanizationConfig, Point, Rect
-
 
 # =============================================================================
 # Bezier Curve Tests
@@ -113,7 +109,7 @@ class TestComputeBezierPath:
         config2 = HumanizationConfig(seed=42)
         path2 = compute_bezier_path(start, end, config2)
         assert len(path1) == len(path2)
-        for p1, p2 in zip(path1, path2):
+        for p1, p2 in zip(path1, path2, strict=False):
             assert abs(p1.x - p2.x) < 0.01
             assert abs(p1.y - p2.y) < 0.01
 
@@ -139,7 +135,7 @@ class TestComputeBezierPath:
         path_jitter = compute_bezier_path(start, end, config_with_jitter, num_steps=20)
         # At least some middle points should differ
         diffs = sum(
-            1 for p1, p2 in zip(path_clean[1:-1], path_jitter[1:-1])
+            1 for p1, p2 in zip(path_clean[1:-1], path_jitter[1:-1], strict=False)
             if abs(p1.x - p2.x) > 0.1 or abs(p1.y - p2.y) > 0.1
         )
         assert diffs > 0
@@ -149,7 +145,8 @@ class TestMoveMouse:
     @pytest.mark.asyncio
     async def test_instant_when_disabled(self):
         calls = []
-        move_fn = lambda p: calls.append(p)
+        def move_fn(p):
+            return calls.append(p)
         config = HumanizationConfig(move_enabled=False)
         result = await move_mouse(Point(0, 0), Point(100, 100), move_fn, config)
         assert len(calls) == 1
@@ -159,7 +156,8 @@ class TestMoveMouse:
     @pytest.mark.asyncio
     async def test_multiple_steps_when_enabled(self):
         calls = []
-        move_fn = lambda p: calls.append(p)
+        def move_fn(p):
+            return calls.append(p)
         config = HumanizationConfig(move_enabled=True, move_min_duration_ms=200)
         result = await move_mouse(Point(0, 0), Point(500, 500), move_fn, config)
         assert len(calls) > 2
@@ -169,9 +167,10 @@ class TestMoveMouse:
     @pytest.mark.asyncio
     async def test_tiny_distance_is_instant(self):
         calls = []
-        move_fn = lambda p: calls.append(p)
+        def move_fn(p):
+            return calls.append(p)
         config = HumanizationConfig(move_enabled=True)
-        result = await move_mouse(Point(100, 100), Point(101, 101), move_fn, config)
+        await move_mouse(Point(100, 100), Point(101, 101), move_fn, config)
         assert len(calls) == 1
 
 

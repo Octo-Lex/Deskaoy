@@ -11,14 +11,12 @@ Validates that Deskaoy's universal interface works correctly:
 """
 
 import json
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 
-import deskaoy
 from deskaoy import __version__
-from deskaoy.desktop_agent import DesktopAgent, CAPABILITIES, CAPABILITY_NAMES
+from deskaoy.desktop_agent import CAPABILITIES, CAPABILITY_NAMES, DesktopAgent
 from deskaoy.manifest import CAPABILITY_MANIFEST, validate_manifest
-
 
 # ---------------------------------------------------------------------------
 # 1. CAPABILITIES registry completeness

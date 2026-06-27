@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from deskaoy.grounding.types import BBox, Detection, DetectionSource, ElementRole
 from deskaoy.grounding.detector import OmniParserDetector
+from deskaoy.grounding.types import BBox, Detection, DetectionSource, ElementRole
 
 
 def _png_bytes(w: int = 200, h: int = 200) -> bytes:

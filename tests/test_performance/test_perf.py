@@ -3,21 +3,17 @@ from __future__ import annotations
 
 import time
 
-import pytest
-
 from deskaoy.performance import (
-    BenchmarkResult,
-    BenchmarkSuite,
     LATENCY_TARGETS,
-    LRUCache,
+    BenchmarkSuite,
     LatencyProfiler,
+    LRUCache,
     PerformanceMonitor,
     SnapshotFormatCache,
     TimingResult,
     get_global_profiler,
     timed,
 )
-
 
 # ── LatencyProfiler ────────────────────────────────────────────────────
 
@@ -152,20 +148,20 @@ class TestSnapshotFormatCache:
     """Test the snapshot format cache."""
 
     def test_cache_miss(self):
-        from deskaoy.cascade.types import AXSnapshot, AXNode
+        from deskaoy.cascade.types import AXNode, AXSnapshot
         cache = SnapshotFormatCache()
         snap = AXSnapshot(url="win32://Test", title="Test", nodes={"e1": AXNode(ref="e1", role="button", name="OK")})
         assert cache.get_formatted(snap) is None
 
     def test_cache_hit(self):
-        from deskaoy.cascade.types import AXSnapshot, AXNode
+        from deskaoy.cascade.types import AXNode, AXSnapshot
         cache = SnapshotFormatCache()
         snap = AXSnapshot(url="win32://Test", title="Test", nodes={"e1": AXNode(ref="e1", role="button", name="OK")})
         cache.put_formatted(snap, "formatted text")
         assert cache.get_formatted(snap) == "formatted text"
 
     def test_different_snapshots_different_keys(self):
-        from deskaoy.cascade.types import AXSnapshot, AXNode
+        from deskaoy.cascade.types import AXNode, AXSnapshot
         cache = SnapshotFormatCache()
         snap1 = AXSnapshot(url="win32://A", title="A", nodes={"e1": AXNode(ref="e1", role="button", name="OK")})
         snap2 = AXSnapshot(url="win32://B", title="B", nodes={"e1": AXNode(ref="e1", role="button", name="OK")})

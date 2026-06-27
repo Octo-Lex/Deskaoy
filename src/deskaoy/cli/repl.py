@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import uuid
+from typing import Any
 
 from deskaoy.cli.main import _get_agent
 

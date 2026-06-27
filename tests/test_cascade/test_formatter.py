@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
-import pytest
-
-from deskaoy.cascade.types import AXNode, AXSnapshot
 from deskaoy.cascade.formatter import (
-    format_snapshot,
-    _build_tree,
-    _pass_filter,
-    _pass_dedup,
-    _pass_prune,
-    _pass_collapse,
     _FormatNode,
+    _pass_collapse,
+    _pass_dedup,
+    _pass_filter,
+    _pass_prune,
+    format_snapshot,
 )
-
+from deskaoy.cascade.types import AXNode, AXSnapshot
 
 # ---------------------------------------------------------------------------
 # Helpers

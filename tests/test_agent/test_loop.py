@@ -1,7 +1,6 @@
 """Tests for AgentLoop."""
 
 import asyncio
-import time
 from unittest.mock import AsyncMock, MagicMock
 
 from deskaoy.agent.loop import AgentLoop
@@ -150,7 +149,7 @@ class TestAgentLoop:
         asyncio.run(_test())
 
     def test_page_change_detection(self):
-        detector = ActionLoopDetector()
+        ActionLoopDetector()
         loop = AgentLoop(
             controller=_make_controller(),
             registry=_make_registry(),
@@ -299,7 +298,7 @@ class TestAgentLoop:
                 recovery_coordinator=mock_recovery,
             )
 
-            result = await loop.run("test")
+            await loop.run("test")
             # Loop detection should have fired — check prompt contains nudge
             nudge_prompts = [p for p in prompts_seen if "LOOP DETECTED" in p]
             assert len(nudge_prompts) >= 1, f"Loop detection must fire even with recovery active. Got {len(nudge_prompts)} nudge prompts out of {len(prompts_seen)} total"

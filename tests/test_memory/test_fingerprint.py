@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import hashlib
-
 import pytest
 
 from deskaoy.memory.fingerprint import (
+    _dhash,
     compute_visual_fingerprint,
     crop_fingerprint,
     fingerprint_distance,
-    _dhash,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -22,8 +19,10 @@ from deskaoy.memory.fingerprint import (
 def _make_png(width: int = 100, height: int = 100, color: tuple = (128, 128, 128)) -> bytes:
     """Create a minimal PNG image for testing."""
     try:
-        from PIL import Image
         import io
+
+        from PIL import Image
+
         img = Image.new("RGB", (width, height), color)
         buf = io.BytesIO()
         img.save(buf, format="PNG")
@@ -35,8 +34,10 @@ def _make_png(width: int = 100, height: int = 100, color: tuple = (128, 128, 128
 def _make_gradient_png(width: int = 100, height: int = 100) -> bytes:
     """Create a gradient PNG image."""
     try:
-        from PIL import Image
         import io
+
+        from PIL import Image
+
         img = Image.new("L", (width, height))
         for y in range(height):
             for x in range(width):
@@ -67,8 +68,10 @@ class TestComputeVisualFingerprint:
 
     def test_different_images_different_fingerprints(self):
         try:
-            from PIL import Image
             import io
+
+            from PIL import Image
+
 
             # Create a clear gradient image
             img1 = Image.new("L", (100, 100))
@@ -179,7 +182,6 @@ class TestCropFingerprint:
         # If Pillow is available, this tests a real crop
         # If not, crop_fingerprint returns None
         try:
-            from PIL import Image
             # Pillow available — test should work
             fp = crop_fingerprint(_make_png(100, 100), (10, 10, 50, 50), (100, 100))
             assert fp is not None

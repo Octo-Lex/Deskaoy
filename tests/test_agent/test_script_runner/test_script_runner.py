@@ -11,22 +11,19 @@ Covers:
 from __future__ import annotations
 
 import json
-import pytest
-import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
-from deskaoy.os_types import AgentResult, ResultStatus, Confidence
-from deskaoy.agent.script_runner import (
-    ScriptRunner,
-    ScriptResult,
-    ScriptStep,
-    ScriptStepResult,
-    ScriptValidationError,
-    validate_script,
-    load_script,
-)
+import pytest
 
+from deskaoy.agent.script_runner import (
+    ScriptResult,
+    ScriptRunner,
+    ScriptValidationError,
+    load_script,
+    validate_script,
+)
+from deskaoy.os_types import AgentResult, Confidence, ResultStatus
 
 # ---------------------------------------------------------------------------
 # Mock agent

@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from deskaoy.agent.registry import ToolDefinition, ToolParameter, ToolRegistry
-from deskaoy.llm.client import SimpleLLMClient, _extract_json, LLMUsage
-
+from deskaoy.llm.client import LLMUsage, SimpleLLMClient, _extract_json
 
 # ---------------------------------------------------------------------------
 # JSON extraction

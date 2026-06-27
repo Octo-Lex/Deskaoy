@@ -1,7 +1,5 @@
 """Tests for SessionDB."""
 
-import time
-from pathlib import Path
 
 from deskaoy.tracing.session_db import SessionDB
 from deskaoy.tracing.types import CostRecord, SessionSummary

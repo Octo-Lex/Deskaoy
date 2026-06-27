@@ -6,28 +6,21 @@ COM-dependent tests use mocks to simulate IUIAutomation behavior.
 
 from __future__ import annotations
 
-import threading
-import time
-from dataclasses import dataclass
-from typing import Any, Optional
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from deskaoy.adapters.uia_walker import (
+    _INFORMATIVE_TYPE_IDS,
+    _INTERACTIVE_TYPE_IDS,
+    _UIA_CONTROL_TYPE_MAP,
+    _UIA_CONTROL_TYPE_NAMES,
     UIAElement,
     UIAWalker,
     WalkerConfig,
-    _IUIAWrapper,
-    _UIA_CONTROL_TYPE_MAP,
-    _UIA_CONTROL_TYPE_NAMES,
-    _INTERACTIVE_TYPE_IDS,
-    _INFORMATIVE_TYPE_IDS,
     _get_value_pattern,
+    _IUIAWrapper,
 )
 from deskaoy.cascade.types import AXNode, AXSnapshot
 from deskaoy.grounding.types import BBox, Detection, DetectionSource, ElementRole
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -331,7 +324,7 @@ class TestGetValuePattern:
         mock_pattern.QueryInterface.return_value = mock_iface
         mock_elem.GetCurrentPattern.return_value = mock_pattern
 
-        with patch("deskaoy.adapters.uia_walker._get_value_pattern") as mock_fn:
+        with patch("deskaoy.adapters.uia_walker._get_value_pattern"):
             # We can't easily mock comtypes imports, so just test the function
             # handles exceptions gracefully
             pass
@@ -452,7 +445,7 @@ class TestWalkCaps:
             ref="", depth=depth, is_visible=True,
         )
 
-        elements = walker.walk(hwnd=None)
+        walker.walk(hwnd=None)
         # The walk should have respected max_depth
         if call_log:
             assert max(call_log) <= config.max_depth + 1  # +1 for initial call

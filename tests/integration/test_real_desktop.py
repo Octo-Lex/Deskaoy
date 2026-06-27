@@ -15,7 +15,6 @@ Run with:
 from __future__ import annotations
 
 import asyncio
-import os
 import subprocess
 import sys
 import time
@@ -41,9 +40,9 @@ def notepad_hwnd():
         pytest.skip("win32gui not available")
 
     # Use a unique window title to identify our instance
-    import win32con
-    import time
     import subprocess
+
+    import win32con
 
     # Launch Notepad
     proc = subprocess.Popen(["notepad.exe"])

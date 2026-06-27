@@ -7,7 +7,6 @@ import pytest
 from deskaoy.orchestration.dag import (
     DAGExecutor,
     DAGNode,
-    DAGNodeResult,
     _topological_sort,
 )
 
@@ -203,6 +202,6 @@ class TestDAGExecutor:
     async def test_node_label_preserved(self):
         nodes = [DAGNode(id=1, action=lambda: _ok_action(), depends_on=[], label="outlook")]
         executor = DAGExecutor()
-        results = await executor.execute(nodes)
+        await executor.execute(nodes)
         # Label is on the node, not the result — verify node has it
         assert nodes[0].label == "outlook"

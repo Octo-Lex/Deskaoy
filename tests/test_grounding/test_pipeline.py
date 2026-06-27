@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from io import BytesIO
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from unittest.mock import AsyncMock, MagicMock
 
 from deskaoy.cascade.types import VisionRequest, VisionResponse
+from deskaoy.grounding.pipeline import GroundingPipeline
 from deskaoy.grounding.types import (
     BBox,
     Detection,
@@ -16,7 +15,6 @@ from deskaoy.grounding.types import (
     FusedElement,
     GroundingResult,
 )
-from deskaoy.grounding.pipeline import GroundingPipeline
 
 
 def _png_bytes(w: int = 200, h: int = 200) -> bytes:

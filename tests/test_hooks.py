@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import pytest
 
-from deskaoy.hooks import HookName, HookContext, HookRegistry
-
+from deskaoy.hooks import HookContext, HookName, HookRegistry
 
 # ---------------------------------------------------------------------------
 # Registration

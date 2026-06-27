@@ -7,16 +7,13 @@ if any action exceeds p99 by 2×.
 Run: pytest tests/benchmarks/ --benchmark-only -v
 """
 
-import asyncio
-from unittest.mock import MagicMock
 
 import pytest
 
-from deskaoy.os_types import AgentContext, AgentGoal, CancellationToken
 from deskaoy.desktop_agent import DesktopAgent
+from deskaoy.os_types import AgentContext, AgentGoal
 from deskaoy.results.types import ActionResult, ResultMeta
 from deskaoy.safety.latency_budget import ACTION_BUDGETS
-
 
 # ---------------------------------------------------------------------------
 # Fast mock adapter (no I/O, minimal overhead)
@@ -164,7 +161,7 @@ class TestOrchestrateBenchmark:
     @pytest.mark.asyncio
     @pytest.mark.benchmark(group="orchestrate", min_rounds=10)
     async def test_benchmark_orchestrate_template(self, agent, benchmark):
-        budget = ACTION_BUDGETS["automate"]["p99"] * 2
+        ACTION_BUDGETS["automate"]["p99"] * 2
 
         async def _run():
             goal = AgentGoal(

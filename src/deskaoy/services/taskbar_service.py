@@ -265,7 +265,11 @@ class TaskbarService:
                 }
 
                 # Determine position from bounds
-                screen_height = win32api.GetSystemMetrics(1) if self._can_import_win32api() else 1080
+                try:
+                    import win32api
+                    screen_height = win32api.GetSystemMetrics(1)
+                except ImportError:
+                    screen_height = 1080
                 if top == 0 and bottom < 100:
                     state["position"] = "top"
                 elif bottom >= screen_height:

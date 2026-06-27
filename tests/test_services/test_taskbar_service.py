@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
-import pytest
 
-from deskaoy.services.taskbar_service import TaskbarService, TaskbarItem
+from deskaoy.services.taskbar_service import TaskbarItem, TaskbarService
 
 
 class TestTaskbarItem:

@@ -8,11 +8,8 @@ All methods are async — use pytest-asyncio.
 
 from __future__ import annotations
 
-import asyncio
 import re
-from dataclasses import dataclass
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -27,15 +24,12 @@ from deskaoy.os_types import (
     ErrorCode,
     Issue,
     IssueSeverity,
-    MutationRecord,
-    OperationCancelled,
-    ResultStatus,
     RestoreMethod,
+    ResultStatus,
     Snapshot,
     UndoResult,
 )
 from deskaoy.results.types import ActionResult, ResultMeta
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

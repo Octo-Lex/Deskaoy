@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
-import struct
 from io import BytesIO
 
-import pytest
-
+from deskaoy.grounding.som_renderer import render_som
 from deskaoy.grounding.types import (
     BBox,
     DetectionSource,
     ElementRole,
     FusedElement,
 )
-from deskaoy.grounding.som_renderer import render_som
-
 
 # ---------------------------------------------------------------------------
 # Helpers

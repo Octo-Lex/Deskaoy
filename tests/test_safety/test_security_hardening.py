@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import asyncio
-import pytest
 from unittest.mock import MagicMock
 
-from deskaoy.safety.key_blocklist import is_blocked_key
 from deskaoy.safety.health import HealthCheck
 
 
@@ -15,7 +13,7 @@ class TestKeyBlocklistWired:
     def test_blocked_key_returns_security_error(self):
         """Blocked key combo returns ActionResult with SECURITY error."""
         from deskaoy.adapters.windows import WindowsAdapter
-        from deskaoy.results.types import ActionError, ErrorCategory
+        from deskaoy.results.types import ErrorCategory
 
         adapter = WindowsAdapter(hwnd=1)
         adapter._win32gui = MagicMock()

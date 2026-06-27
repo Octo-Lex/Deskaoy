@@ -23,7 +23,7 @@ from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 

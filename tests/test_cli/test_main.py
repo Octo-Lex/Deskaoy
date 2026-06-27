@@ -1,26 +1,21 @@
 """Tests for CLI main (T01-01 through T01-20, T01-31, T01-32)."""
 from __future__ import annotations
 
-import json
-import sys
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from deskaoy.os_types import (
-    AgentResult,
-    AgentEstimate,
-    ResultStatus,
-    Confidence,
-)
-from deskaoy.cli.main import (
-    main,
-    _build_parser,
-    _get_agent,
-    _reset_agent,
-    _resolve_storage_dir,
-    _VERSION,
-)
+import pytest
 
+from deskaoy.cli.main import (
+    _build_parser,
+    _resolve_storage_dir,
+    main,
+)
+from deskaoy.os_types import (
+    AgentEstimate,
+    AgentResult,
+    Confidence,
+    ResultStatus,
+)
 
 # ---------------------------------------------------------------------------
 # Mock agent factory

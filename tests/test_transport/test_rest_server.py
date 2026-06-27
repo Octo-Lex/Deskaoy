@@ -1,12 +1,11 @@
 """Tests for REST transport (BATCH-05 TASK-05)."""
 from __future__ import annotations
 
-import json
 import pytest
 
 from deskaoy.transport.rest_server import (
-    _get_or_create_token,
     _check_token,
+    _get_or_create_token,
     create_app,
 )
 

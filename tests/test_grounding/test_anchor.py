@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
-
+from deskaoy.grounding.anchor import build_anchor_map, compute_anchor
+from deskaoy.grounding.tracker import track_frames
 from deskaoy.grounding.types import (
     BBox,
     DetectionSource,
     ElementRole,
     FusedElement,
 )
-from deskaoy.grounding.anchor import compute_anchor, build_anchor_map
-from deskaoy.grounding.tracker import track_frames
-
 
 # ---------------------------------------------------------------------------
 # Helpers

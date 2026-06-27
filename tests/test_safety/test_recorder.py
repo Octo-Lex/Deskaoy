@@ -1,15 +1,11 @@
 """Tests for session recorder."""
 
 import json
-import tempfile
-from pathlib import Path
 
 import pytest
 
 from deskaoy.recording.recorder import SessionRecorder
 from deskaoy.recording.types import (
-    RecordingSession,
-    StepRecord,
     _filter_sensitive,
 )
 

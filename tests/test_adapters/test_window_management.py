@@ -1,11 +1,10 @@
 """BATCH-20: Window & display management tests."""
 from __future__ import annotations
 
-import asyncio
 import sys
+from unittest.mock import MagicMock
 
 import pytest
-from unittest.mock import MagicMock
 
 from deskaoy.adapters.windows import WindowsAdapter
 from deskaoy.cascade.protocol import SurfaceAdapter

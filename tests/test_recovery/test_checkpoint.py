@@ -1,9 +1,6 @@
 """Tests for CheckpointManager — H6: real implementation tests."""
 
 import asyncio
-from pathlib import Path
-
-import pytest
 
 from deskaoy.recovery.checkpoint import CheckpointManager
 

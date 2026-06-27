@@ -12,7 +12,6 @@ Proves the full stack:
 
 from __future__ import annotations
 
-import asyncio
 import os
 import subprocess
 import sys
@@ -303,7 +302,7 @@ class TestDesktopAgentLive:
         from deskaoy.agent.registry import ToolRegistry
         from deskaoy.desktop_agent import DesktopAgent
         from deskaoy.llm.client import SimpleLLMClient
-        from deskaoy.os_types import AgentContext, AgentGoal, CancellationToken, ResultStatus
+        from deskaoy.os_types import AgentContext, AgentGoal, CancellationToken
 
         proc, hwnd = notepad_process
 

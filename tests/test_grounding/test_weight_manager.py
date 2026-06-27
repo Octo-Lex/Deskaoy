@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from deskaoy.grounding.weight_manager import WeightManager
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -59,7 +56,7 @@ class TestWeightManager:
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 dest.write_bytes(b"downloaded")
             mock_dl.side_effect = fake_download
-            result = wm.ensure_weights("icon_detect")
+            wm.ensure_weights("icon_detect")
             # Should have downloaded model.pt and model.yaml
             assert mock_dl.call_count >= 1
 

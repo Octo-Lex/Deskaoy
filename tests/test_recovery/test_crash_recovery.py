@@ -6,9 +6,9 @@ import time
 import pytest
 
 from deskaoy.recovery.crash_recovery import (
+    CHECKPOINT_VERSION,
     AgentCheckpoint,
     CrashRecovery,
-    CHECKPOINT_VERSION,
 )
 
 

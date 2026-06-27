@@ -1,12 +1,11 @@
 """Tests for HealthCheck — readiness/liveness probe."""
 
-import asyncio
-from unittest.mock import MagicMock, AsyncMock, PropertyMock
+from unittest.mock import MagicMock
 
 import pytest
 
-from deskaoy.safety.health import HealthCheck, HealthStatus
 from deskaoy.safety.cost_tracker import CostTracker
+from deskaoy.safety.health import HealthCheck, HealthStatus
 
 
 def _make_agent(

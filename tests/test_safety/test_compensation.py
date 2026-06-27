@@ -2,23 +2,15 @@
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
-from deskaoy.safety.compensation import (
-    CompensatingAction,
-    CompensationEngine,
-    CompensationPlan,
-    RollbackReport,
-    RollbackStepResult,
-    _compute_inverse,
-    _READ_ONLY_ACTIONS,
-    _IRREVERSIBLE_ACTIONS,
-)
 from deskaoy.results.types import ActionResult
-
+from deskaoy.safety.compensation import (
+    CompensationEngine,
+    _compute_inverse,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -351,7 +343,7 @@ class TestExecutePlan:
         engine.register("e1", "fill", "a", {"value": "old"}, {})
 
         plan = engine.build_plan("e1")
-        report = await engine.execute_plan(plan)
+        await engine.execute_plan(plan)
 
         assert ledger.append.called
         call_args = ledger.append.call_args

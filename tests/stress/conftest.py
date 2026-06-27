@@ -14,10 +14,10 @@ Usage:
   pytest tests/stress/ -m property        — run only property tests
   pytest tests/stress/ --run-all-stress   — run everything
 """
-import pytest
 import asyncio
 import os
-import tempfile
+
+import pytest
 
 
 def pytest_configure(config):

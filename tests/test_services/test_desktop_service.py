@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
-import pytest
 
 from deskaoy.services.desktop_service import DesktopService, VirtualDesktop
 

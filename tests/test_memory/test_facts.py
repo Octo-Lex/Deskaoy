@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-import pytest
-
+from deskaoy.memory.fact_extractor import ExtractionPattern, FactExtractor
 from deskaoy.memory.facts import Fact, FactStore, SoulAspect
-from deskaoy.memory.fact_extractor import FactExtractor, ExtractionPattern
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Fact + Soul dataclass

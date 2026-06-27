@@ -1,10 +1,6 @@
 """Tests for ToolRegistry."""
 
-import asyncio
 import threading
-import time
-from pathlib import Path
-from unittest.mock import AsyncMock
 
 from deskaoy.agent.registry import ToolRegistry
 from deskaoy.interaction.decorator import agent_action
@@ -141,7 +137,6 @@ def helper():
 
     def test_thread_safety(self):
         registry = ToolRegistry()
-        errors = []
 
         def writer():
             for i in range(50):

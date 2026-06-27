@@ -5,11 +5,9 @@ import pytest
 from deskaoy.security.types import (
     CommandSafety,
     CommandVerdict,
-    DomainVerdict,
     InjectionMatch,
     InjectionPattern,
     InjectionVerdict,
-    PolicyDecision,
     PolicyRule,
     PolicyVerdict,
     RedactionEntry,

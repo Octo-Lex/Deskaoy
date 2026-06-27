@@ -4,28 +4,25 @@ from __future__ import annotations
 
 import pytest
 
+from deskaoy.grounding.artifacts import (
+    KNOWN_ARTIFACTS,
+    ModelArtifact,
+    get_artifact,
+    register_artifact,
+)
 from deskaoy.memory.learning import (
+    AUTO_ACCEPTABLE_CATEGORIES,
+    REVIEW_REQUIRED_CATEGORIES,
     LearningCategory,
     LearningEvidence,
     ReviewStatus,
     apply_policy_to_evidence,
     classify_evidence,
-    AUTO_ACCEPTABLE_CATEGORIES,
-    REVIEW_REQUIRED_CATEGORIES,
 )
 from deskaoy.stealth_gate import (
     StealthGate,
-    StealthPolicyDecision,
-    StealthRiskLevel,
     default_stealth_gate,
 )
-from deskaoy.grounding.artifacts import (
-    ModelArtifact,
-    KNOWN_ARTIFACTS,
-    get_artifact,
-    register_artifact,
-)
-
 
 # ===================================================================
 # Phase 8: Action Memory as Learning Evidence

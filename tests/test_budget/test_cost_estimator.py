@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 from deskaoy.budget.cost_estimator import CostEstimator
-from deskaoy.budget.types import ModelPricing
 
 
 class TestCostEstimator:

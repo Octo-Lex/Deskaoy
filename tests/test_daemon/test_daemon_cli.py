@@ -5,18 +5,14 @@ Tests TEST-37-03-01 through TEST-37-03-11.
 
 from __future__ import annotations
 
-import asyncio
 import json
-import os
 import sys
 from io import StringIO
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from deskaoy.cli.main import _build_parser, main, _COMMANDS
-
+from deskaoy.cli.main import _COMMANDS, _build_parser, main
 
 # ---------------------------------------------------------------------------
 # Helpers

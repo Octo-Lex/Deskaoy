@@ -1,9 +1,11 @@
 """Tests for vision types — enums, dataclasses, configuration."""
 
+import pytest
+
 from deskaoy.vision.types import (
-    CascadeConfig,
     CaptchaSolution,
     CaptchaType,
+    CascadeConfig,
     OCRWord,
     StateInference,
     VisionCacheEntry,
@@ -57,7 +59,7 @@ class TestVisionLocation:
         loc = VisionLocation(x=1, y=2)
         try:
             loc.x = 99  # type: ignore
-            assert False
+            pytest.fail()
         except AttributeError:
             pass
 

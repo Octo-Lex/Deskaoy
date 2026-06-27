@@ -7,9 +7,6 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-import pytest
-
-
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
@@ -44,6 +41,7 @@ class TestVersionBump:
 
     def test_version_at_least_042(self):
         """Version must be at least 0.42.0 after BATCH-33."""
-        from deskaoy.cli.version import VERSION
         from packaging.version import Version
+
+        from deskaoy.cli.version import VERSION
         assert Version(VERSION) >= Version("1.1.0")

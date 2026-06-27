@@ -1,19 +1,16 @@
 """Tests for B38 Runtime Preflight (T03-09 through T03-17, T03-28 through T03-32, T03-35 through T03-37, T03-40)."""
 from __future__ import annotations
 
-import asyncio
-import pytest
-from unittest.mock import AsyncMock, MagicMock, PropertyMock
+from unittest.mock import MagicMock
 
+import pytest
+
+from deskaoy.runtime.preflight import RuntimePreflight
 from deskaoy.runtime.types import (
-    AdapterCapabilities,
+    WINDOWS_CAPABILITIES,
     PolicyObligation,
     RuntimeResourceBudget,
-    PreflightCheck,
-    WINDOWS_CAPABILITIES,
 )
-from deskaoy.runtime.preflight import RuntimePreflight
-
 
 # ---------------------------------------------------------------------------
 # Mock agent

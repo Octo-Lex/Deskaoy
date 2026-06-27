@@ -3,16 +3,14 @@ from __future__ import annotations
 
 import pytest
 
-from deskaoy.safety.key_blocklist import is_blocked_key, block_reason, BLOCKED_KEYS
+from deskaoy.safety.key_blocklist import BLOCKED_KEYS, block_reason, is_blocked_key
 from deskaoy.safety.sensitive_apps import (
-    is_sensitive_app,
-    get_sensitive_app_rule,
-    sensitive_app_tier,
-    sensitive_app_reason,
     SENSITIVE_APPS,
     SensitiveTier,
+    is_sensitive_app,
+    sensitive_app_reason,
+    sensitive_app_tier,
 )
-
 
 # ---------------------------------------------------------------------------
 # Key Blocklist Tests

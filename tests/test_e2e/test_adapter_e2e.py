@@ -7,11 +7,9 @@ All mocked — no real OS APIs or hardware required.
 """
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
-from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -23,8 +21,6 @@ pytestmark = pytest.mark.skipif(
 
 from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.cascade.types import AXNode, AXSnapshot
-from deskaoy.results.types import ActionError, ErrorCategory, ActionResult, action_result
-
 
 # =================================================================
 # Windows Adapter E2E Lifecycle
@@ -190,15 +186,14 @@ def _mock_pyobjc_modules():
 def _make_macos_adapter(**kwargs):
     """Create a MacOSAdapter with mocked pyobjc."""
     macos_modules = _mock_pyobjc_modules()
-    with patch.dict('sys.modules', macos_modules):
-        with patch.object(sys, 'platform', 'darwin'):
-            from deskaoy.adapters.macos import MacOSAdapter
-            adapter = MacOSAdapter(**kwargs)
-            adapter._app_services = macos_modules['ApplicationServices']
-            adapter._core_graphics = macos_modules['CoreGraphics']
-            adapter._quartz = macos_modules['Quartz']
-            adapter._imported = True
-            return adapter
+    with patch.dict('sys.modules', macos_modules), patch.object(sys, 'platform', 'darwin'):
+        from deskaoy.adapters.macos import MacOSAdapter
+        adapter = MacOSAdapter(**kwargs)
+        adapter._app_services = macos_modules['ApplicationServices']
+        adapter._core_graphics = macos_modules['CoreGraphics']
+        adapter._quartz = macos_modules['Quartz']
+        adapter._imported = True
+        return adapter
 
 
 class TestMacOSAdapterE2E:

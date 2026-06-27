@@ -12,11 +12,8 @@ from __future__ import annotations
 import asyncio
 import io
 import sys
-from unittest.mock import MagicMock, patch
 
-import pytest
-
-from deskaoy.cli.main import _cmd_doctor, _build_parser
+from deskaoy.cli.main import _build_parser, _cmd_doctor
 
 
 def _run_doctor() -> tuple[int, str]:

@@ -3,7 +3,6 @@
 import time
 
 from deskaoy.budget.credential_pool import CircuitBreaker
-from deskaoy.budget.types import CircuitState
 
 
 class TestCircuitBreaker:

@@ -1,6 +1,6 @@
 """Tests for Templates — pre-built orchestration patterns."""
 
-from deskaoy.orchestration.templates import match_template, list_templates, TEMPLATES
+from deskaoy.orchestration.templates import TEMPLATES, list_templates, match_template
 
 
 class TestMatchTemplate:
@@ -36,14 +36,14 @@ class TestMatchTemplate:
         assert result is not None
 
     def test_template_has_description(self):
-        for name, template in TEMPLATES.items():
+        for _name, template in TEMPLATES.items():
             assert "description" in template
             assert "trigger" in template
             assert "subtasks" in template
             assert len(template["subtasks"]) > 0
 
     def test_template_subtasks_have_required_fields(self):
-        for name, template in TEMPLATES.items():
+        for _name, template in TEMPLATES.items():
             for st in template["subtasks"]:
                 assert "id" in st
                 assert "app" in st

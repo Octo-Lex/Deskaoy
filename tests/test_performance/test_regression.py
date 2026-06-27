@@ -12,16 +12,14 @@ from __future__ import annotations
 import asyncio
 import time
 from pathlib import Path
-from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
 from deskaoy.cascade.snapshot_store import SnapshotStore
-from deskaoy.safety.health import HealthCheck
 from deskaoy.observation import ObservationConfig
 from deskaoy.observation_pipeline import ObservationPipeline
-
+from deskaoy.safety.health import HealthCheck
 
 # ── Mock Adapters ──────────────────────────────────────────────────────
 
@@ -132,7 +130,6 @@ class TestHealthCheckLatency:
 
     @pytest.mark.asyncio
     async def test_health_check_under_200ms(self):
-        from unittest.mock import MagicMock
         health = HealthCheck(agent=MagicMock())
         start = time.monotonic()
         result = await health.check()

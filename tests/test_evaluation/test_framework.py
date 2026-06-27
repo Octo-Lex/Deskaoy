@@ -4,16 +4,15 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+
 import pytest
 
 from deskaoy.evaluation import (
-    TaskDefinition,
-    TaskResult,
-    BenchmarkResult,
-    EvalResult,
-    TaskDifficulty,
-    Evaluator,
     BenchmarkRunner,
+    EvalResult,
+    Evaluator,
+    TaskDefinition,
+    TaskDifficulty,
 )
 
 

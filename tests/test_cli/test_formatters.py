@@ -2,29 +2,24 @@
 from __future__ import annotations
 
 import json
-import pytest
 
-from deskaoy.os_types import (
-    AgentResult,
-    AgentEstimate,
-    ResultStatus,
-    Confidence,
-    Issue,
-    IssueSeverity,
-    ErrorCode,
-    MutationRecord,
-    RestoreMethod,
-)
 from deskaoy.cli.formatters import (
-    format_result,
     format_estimate,
     format_health,
+    format_result,
     format_routine,
-    format_skill,
-    format_fact,
     format_schema,
+    format_skill,
 )
-
+from deskaoy.os_types import (
+    AgentEstimate,
+    AgentResult,
+    Confidence,
+    ErrorCode,
+    Issue,
+    IssueSeverity,
+    ResultStatus,
+)
 
 # ---------------------------------------------------------------------------
 # Fixtures

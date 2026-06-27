@@ -60,13 +60,12 @@ class TestCreateAdapterFactory:
             'CoreGraphics': MagicMock(),
             'Quartz': MagicMock(),
         }
-        with patch.dict('sys.modules', macos_modules):
-            with patch('sys.platform', 'darwin'):
-                with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
-                    adapter = Environment.create_adapter(pid=100)
-                    assert adapter is not None
-                    assert hasattr(adapter, 'click')
-                    assert hasattr(adapter, 'screenshot')
+        with patch.dict('sys.modules', macos_modules), patch('sys.platform', 'darwin'):
+            with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
+                adapter = Environment.create_adapter(pid=100)
+                assert adapter is not None
+                assert hasattr(adapter, 'click')
+                assert hasattr(adapter, 'screenshot')
 
     def test_create_adapter_macos_missing_pyobjc_raises_on_use(self):
         """MacOSAdapter can be created but methods fail without pyobjc."""
@@ -96,12 +95,11 @@ class TestCreateAdapterFactory:
             'CoreGraphics': MagicMock(),
             'Quartz': MagicMock(),
         }
-        with patch.dict('sys.modules', macos_modules):
-            with patch('sys.platform', 'darwin'):
-                with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
-                    adapter = Environment.create_adapter(pid=42, bundle_id="com.test")
-                    assert adapter._pid == 42
-                    assert adapter._bundle_id == "com.test"
+        with patch.dict('sys.modules', macos_modules), patch('sys.platform', 'darwin'):
+            with patch.dict(os.environ, {"DESKTOP_AGENT_MACOS": "1"}):
+                adapter = Environment.create_adapter(pid=42, bundle_id="com.test")
+                assert adapter._pid == 42
+                assert adapter._bundle_id == "com.test"
 
 
 class TestLazyImport:
@@ -126,11 +124,10 @@ class TestLazyImport:
             'CoreGraphics': MagicMock(),
             'Quartz': MagicMock(),
         }
-        with patch.dict('sys.modules', macos_modules):
-            with patch('sys.platform', 'darwin'):
-                from deskaoy.adapters.macos import MacOSAdapter
-                adapter = MacOSAdapter(pid=1)
-                adapter._ensure_imports()
-                assert adapter._imported is True
-                adapter._ensure_imports()
-                assert adapter._imported is True
+        with patch.dict('sys.modules', macos_modules), patch('sys.platform', 'darwin'):
+            from deskaoy.adapters.macos import MacOSAdapter
+            adapter = MacOSAdapter(pid=1)
+            adapter._ensure_imports()
+            assert adapter._imported is True
+            adapter._ensure_imports()
+            assert adapter._imported is True

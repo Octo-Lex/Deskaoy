@@ -11,9 +11,7 @@ from deskaoy.memory.types import (
     AnchorKind,
     DurableTarget,
     HealStrategy,
-    TierRecord,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -102,8 +100,9 @@ class TestHealVisualFingerprint:
     @pytest.mark.asyncio
     async def test_visual_match(self):
         try:
-            from PIL import Image
             import io
+
+            from PIL import Image
 
             healer = SelfHealer(fingerprint_threshold=0.5)
             target = _target(

@@ -5,40 +5,31 @@ Injects random failures and verifies recovery or graceful degradation.
 
 Layer 3 of the stress testing strategy.
 """
-import pytest
 import asyncio
 import json
 import os
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-from hypothesis import given, settings, HealthCheck
-from hypothesis.strategies import text, binary
 
-
-# ── Imports ──────────────────────────────────────────────────────────────
-
-from deskaoy.safety.cost_tracker import CostTracker
-from deskaoy.safety.latency_budget import LatencyBudget
-from deskaoy.safety.timeout_guard import TimeoutGuard
-from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
-from deskaoy.safety.injection import PromptInjectionDetector
-from deskaoy.safety.evidence_ledger import EvidenceLedger, LedgerEntry
-
-from deskaoy.memory.facts import Fact, FactStore
+import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis.strategies import binary, text
 
 from deskaoy.cascade.cache import TierPreferenceCache
-from deskaoy.cascade.types import Tier
-
-from deskaoy.recovery.format_validator import FormatValidator, ValidationResult
+from deskaoy.memory.facts import Fact, FactStore
+from deskaoy.orchestration.blackboard import Blackboard
 from deskaoy.recovery.crash_recovery import CrashRecovery
+from deskaoy.recovery.format_validator import FormatValidator, ValidationResult
 from deskaoy.recovery.retry_tracker import RetryTracker
 
-from deskaoy.orchestration.blackboard import Blackboard
-
-from deskaoy.performance import LatencyProfiler, LRUCache
-
+# ── Imports ──────────────────────────────────────────────────────────────
+from deskaoy.safety.cost_tracker import CostTracker
+from deskaoy.safety.evidence_ledger import EvidenceLedger, LedgerEntry
+from deskaoy.safety.injection import PromptInjectionDetector
+from deskaoy.safety.latency_budget import LatencyBudget
+from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
+from deskaoy.safety.timeout_guard import TimeoutGuard
 
 # ══════════════════════════════════════════════════════════════════════════
 # 1. DISK FAILURE — file I/O chaos
@@ -270,7 +261,7 @@ class TestCascadingFailures:
         tracker = CostTracker(budget_usd=0.005)
         results = []
 
-        for i in range(10):
+        for _i in range(10):
             tracker.record("openai", "gpt-4", input_tokens=1000, output_tokens=500)
             results.append({
                 "cost": tracker.total_cost,

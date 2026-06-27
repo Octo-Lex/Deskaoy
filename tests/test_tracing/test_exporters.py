@@ -5,15 +5,10 @@ TEST-43-03-01 through TEST-43-03-11.
 
 from __future__ import annotations
 
-import asyncio
 import json
-import os
 import sqlite3
 import warnings
-from pathlib import Path
-from unittest import mock
 
-import pytest
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
@@ -25,7 +20,6 @@ from deskaoy.tracing.exporters.redacting import RedactingExporter
 from deskaoy.tracing.exporters.sqlite import SQLiteExporter
 from deskaoy.tracing.runtime import TelemetryConfig, TelemetryRuntime
 from deskaoy.tracing.session_db import SessionDB
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -168,7 +162,7 @@ class TestSQLiteExporterQueueFull:
         exporter = SQLiteExporter(db_path, batch_size=100, max_queue=1)
 
         # Fill the queue manually (maxsize=1, one item fills it).
-        from deskaoy.tracing.types import TraceEvent, SpanKind
+        from deskaoy.tracing.types import SpanKind, TraceEvent
         dummy_event = TraceEvent(
             trace_id="x", step_id=0, span_id="y",
             span_kind=SpanKind.CUSTOM, name="blocker",
@@ -241,7 +235,7 @@ class TestRedactingExporter:
         spans = inner.get_finished_spans()
         assert len(spans) >= 1
         for span in spans:
-            for key, val in (span.attributes or {}).items():
+            for _key, val in (span.attributes or {}).items():
                 if isinstance(val, str):
                     assert "Bearer sk-" not in val, (
                         f"Bearer token should be redacted, got: {val}"
@@ -261,7 +255,7 @@ class TestRedactingExporter:
         spans = inner.get_finished_spans()
         assert len(spans) >= 1
         for span in spans:
-            for key, val in (span.attributes or {}).items():
+            for _key, val in (span.attributes or {}).items():
                 if isinstance(val, str):
                     assert not any(
                         tok.startswith("sk-") and len(tok) > 24

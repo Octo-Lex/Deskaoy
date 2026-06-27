@@ -1,12 +1,10 @@
 """Tests for HostAgent — multi-app orchestration coordinator."""
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
 from deskaoy.orchestration.host_agent import HostAgent, OrchestratedResult, SubtaskDef
-from deskaoy.orchestration.blackboard import Blackboard
 
 
 class TestSubtaskDef:

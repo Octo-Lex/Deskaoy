@@ -8,7 +8,6 @@ Usage:
 from __future__ import annotations
 
 import platform
-from typing import Optional
 
 from deskaoy.cascade.protocol import SurfaceAdapter
 
