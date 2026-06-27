@@ -6,8 +6,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-if TYPE_CHECKING:
+# Pillow is required for these tests
+try:
     from PIL import Image
+except ImportError:
+    Image = None  # type: ignore[assignment]
 
 from deskaoy.memory.fingerprint import (
     _dhash,
@@ -23,31 +26,31 @@ from deskaoy.memory.fingerprint import (
 
 def _make_png(width: int = 100, height: int = 100, color: tuple = (128, 128, 128)) -> bytes:
     """Create a minimal PNG image for testing."""
-    try:
-        import io
-
-        img = Image.new("RGB", (width, height), color)
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return buf.getvalue()
-    except ImportError:
+    if Image is None:
         pytest.skip("Pillow not installed")
+
+    import io
+
+    img = Image.new("RGB", (width, height), color)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 def _make_gradient_png(width: int = 100, height: int = 100) -> bytes:
     """Create a gradient PNG image."""
-    try:
-        import io
-
-        img = Image.new("L", (width, height))
-        for y in range(height):
-            for x in range(width):
-                img.putpixel((x, y), (x + y) % 256)
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return buf.getvalue()
-    except ImportError:
+    if Image is None:
         pytest.skip("Pillow not installed")
+
+    import io
+
+    img = Image.new("L", (width, height))
+    for y in range(height):
+        for x in range(width):
+            img.putpixel((x, y), (x + y) % 256)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------------------
@@ -68,29 +71,28 @@ class TestComputeVisualFingerprint:
         assert fp1 == fp2
 
     def test_different_images_different_fingerprints(self):
-        try:
-            import io
-
-
-            # Create a clear gradient image
-            img1 = Image.new("L", (100, 100))
-            for y in range(100):
-                for x in range(100):
-                    img1.putpixel((x, y), (x * 2 + y * 2) % 256)
-
-            # Create a solid image
-            img2 = Image.new("L", (100, 100), 128)
-
-            buf1, buf2 = io.BytesIO(), io.BytesIO()
-            img1.save(buf1, format="PNG")
-            img2.save(buf2, format="PNG")
-
-            fp1 = compute_visual_fingerprint(buf1.getvalue())
-            fp2 = compute_visual_fingerprint(buf2.getvalue())
-            distance = fingerprint_distance(fp1, fp2)
-            assert distance > 0.05  # Clearly different images
-        except ImportError:
+        if Image is None:
             pytest.skip("Pillow not installed")
+
+        import io
+
+        # Create a clear gradient image
+        img1 = Image.new("L", (100, 100))
+        for y in range(100):
+            for x in range(100):
+                img1.putpixel((x, y), (x * 2 + y * 2) % 256)
+
+        # Create a solid image
+        img2 = Image.new("L", (100, 100), 128)
+
+        buf1, buf2 = io.BytesIO(), io.BytesIO()
+        img1.save(buf1, format="PNG")
+        img2.save(buf2, format="PNG")
+
+        fp1 = compute_visual_fingerprint(buf1.getvalue())
+        fp2 = compute_visual_fingerprint(buf2.getvalue())
+        distance = fingerprint_distance(fp1, fp2)
+        assert distance > 0.05  # Clearly different images
 
     def test_similar_images_similar_fingerprints(self):
         fp1 = compute_visual_fingerprint(_make_png(color=(128, 128, 128)))
@@ -180,13 +182,13 @@ class TestCropFingerprint:
     def test_no_pillow_returns_none(self):
         # If Pillow is available, this tests a real crop
         # If not, crop_fingerprint returns None
-        try:
+        if Image is None:
+            fp = crop_fingerprint(b"fake", (10, 10, 50, 50), (100, 100))
+            assert fp is None
+        else:
             # Pillow available — test should work
             fp = crop_fingerprint(_make_png(100, 100), (10, 10, 50, 50), (100, 100))
             assert fp is not None
-        except ImportError:
-            fp = crop_fingerprint(b"fake", (10, 10, 50, 50), (100, 100))
-            assert fp is None
 
 
 # ---------------------------------------------------------------------------
@@ -196,21 +198,19 @@ class TestCropFingerprint:
 
 class TestDhash:
     def test_uniform_image(self):
-        try:
-            img = Image.new("L", (50, 50), 128)
-            h = _dhash(img)
-            assert isinstance(h, str)
-            assert len(h) > 0
-            # Uniform image → all bits same → all 0s or all 1s depending on implementation
-        except ImportError:
+        if Image is None:
             pytest.skip("Pillow not installed")
+        img = Image.new("L", (50, 50), 128)
+        h = _dhash(img)
+        assert isinstance(h, str)
+        assert len(h) > 0
+        # Uniform image → all bits same → all 0s or all 1s depending on implementation
 
     def test_hash_size(self):
-        try:
-            img = Image.new("L", (50, 50), 128)
-            h8 = _dhash(img, hash_size=8)
-            h16 = _dhash(img, hash_size=16)
-            # Larger hash → longer hex string
-            assert len(h16) >= len(h8)
-        except ImportError:
+        if Image is None:
             pytest.skip("Pillow not installed")
+        img = Image.new("L", (50, 50), 128)
+        h8 = _dhash(img, hash_size=8)
+        h16 = _dhash(img, hash_size=16)
+        # Larger hash → longer hex string
+        assert len(h16) >= len(h8)
