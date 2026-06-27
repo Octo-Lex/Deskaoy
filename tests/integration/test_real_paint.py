@@ -25,8 +25,8 @@ pytestmark = [
 @pytest.fixture()
 def paint_hwnd():
     """Launch Paint, find hwnd, yield, then kill."""
-    import win32gui
     import win32con
+    import win32gui
 
     proc = subprocess.Popen("mspaint.exe")
     time.sleep(2.5)

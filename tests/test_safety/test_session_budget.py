@@ -7,12 +7,10 @@ import time
 import pytest
 
 from deskaoy.safety.session_budget import (
-    EscalationEvent,
     SessionBudget,
     SessionBudgetTracker,
     SessionLimits,
 )
-
 
 # ---------------------------------------------------------------------------
 # SessionBudget dataclass

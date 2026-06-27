@@ -7,17 +7,15 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from deskaoy.adapters.windows import WindowsAdapter
 from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.cascade.types import AXNode, AXSnapshot
-from deskaoy.input.types import HumanizationConfig, Point, Rect
+from deskaoy.input.types import HumanizationConfig, Point
 from deskaoy.results.types import ActionError, ErrorCategory
-
 
 # =================================================================
 # Helpers
@@ -25,7 +23,7 @@ from deskaoy.results.types import ActionError, ErrorCategory
 
 def _make_adapter(
     hwnd: int = 12345,
-    humanization: Optional[HumanizationConfig] = None,
+    humanization: HumanizationConfig | None = None,
 ) -> WindowsAdapter:
     """Create a WindowsAdapter with pre-injected mocks."""
     cfg = humanization or HumanizationConfig(move_enabled=False)
@@ -262,7 +260,7 @@ class TestWaitForSelector:
 
         call_count = 0
 
-        def mock_resolve(target: str) -> Optional[Point]:
+        def mock_resolve(target: str) -> Point | None:
             nonlocal call_count
             call_count += 1
             if call_count >= 3:
@@ -379,7 +377,7 @@ class TestDesktopAgentWiring:
     @pytest.mark.asyncio
     async def test_execute_click_through_desktop_agent(self, adapter):
         from deskaoy.desktop_agent import DesktopAgent
-        from deskaoy.os_types import AgentGoal, AgentContext
+        from deskaoy.os_types import AgentContext, AgentGoal
 
         agent = DesktopAgent(surface=adapter)
         goal = AgentGoal(
@@ -400,7 +398,7 @@ class TestDesktopAgentWiring:
     @pytest.mark.asyncio
     async def test_execute_fill_through_desktop_agent(self, adapter):
         from deskaoy.desktop_agent import DesktopAgent
-        from deskaoy.os_types import AgentGoal, AgentContext
+        from deskaoy.os_types import AgentContext, AgentGoal
 
         agent = DesktopAgent(surface=adapter)
         goal = AgentGoal(
@@ -421,7 +419,7 @@ class TestDesktopAgentWiring:
     @pytest.mark.asyncio
     async def test_execute_screenshot_through_desktop_agent(self, adapter):
         from deskaoy.desktop_agent import DesktopAgent
-        from deskaoy.os_types import AgentGoal, AgentContext
+        from deskaoy.os_types import AgentContext, AgentGoal
 
         agent = DesktopAgent(surface=adapter)
         goal = AgentGoal(
@@ -444,7 +442,7 @@ class TestDesktopAgentWiring:
     @pytest.mark.asyncio
     async def test_execute_snapshot_returns_ax_snapshot(self, adapter):
         from deskaoy.desktop_agent import DesktopAgent
-        from deskaoy.os_types import AgentGoal, AgentContext
+        from deskaoy.os_types import AgentContext, AgentGoal
 
         mock_snapshot = AXSnapshot(
             url="win32://TestWindow",
@@ -474,7 +472,7 @@ class TestDesktopAgentWiring:
     @pytest.mark.asyncio
     async def test_navigate_returns_failure(self, adapter):
         from deskaoy.desktop_agent import DesktopAgent
-        from deskaoy.os_types import AgentGoal, AgentContext
+        from deskaoy.os_types import AgentContext, AgentGoal
 
         agent = DesktopAgent(surface=adapter)
         goal = AgentGoal(

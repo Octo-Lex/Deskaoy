@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-import time
-
-import pytest
-
 from deskaoy.memory.types import (
     ActionEvidence,
     AnchorKind,
@@ -16,7 +12,6 @@ from deskaoy.memory.types import (
     TierRecord,
     compute_target_id,
 )
-
 
 # ---------------------------------------------------------------------------
 # compute_target_id

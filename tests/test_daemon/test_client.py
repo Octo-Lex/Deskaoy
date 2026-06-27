@@ -5,36 +5,23 @@ Tests TEST-37-02-01 through TEST-37-02-10.
 
 from __future__ import annotations
 
-import asyncio
-import dataclasses
 import inspect
-import json
 import os
 import sys
-import time
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from deskaoy.daemon.client import DaemonClient, DaemonUnavailable
+from deskaoy.daemon.client import DaemonClient
 from deskaoy.daemon.config import DaemonConfig
-from deskaoy.daemon.protocol import (
-    build_execute_request,
-    build_ping_request,
-    build_status_request,
-    json_dumps,
-)
 from deskaoy.os_types import (
     AgentContext,
     AgentGoal,
     AgentResult,
-    CancellationToken,
     Confidence,
     ResultStatus,
 )
 from deskaoy.safety.health import HealthStatus
-
 
 # ---------------------------------------------------------------------------
 # Helpers

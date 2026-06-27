@@ -12,11 +12,9 @@ Covers:
 from __future__ import annotations
 
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from deskaoy.results.types import ActionResult
-
 
 # ---------------------------------------------------------------------------
 # DesktopAgent.set_value() facade
@@ -27,8 +25,9 @@ class TestDesktopAgentSetValue:
 
     def test_set_value_delegates_to_invoke_element(self):
         """set_value() should call surface.invoke_element with action='set_value'."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -45,8 +44,9 @@ class TestDesktopAgentSetValue:
 
     def test_set_value_dry_run(self):
         """set_value(dry_run=True) should return without calling invoke_element."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -61,8 +61,9 @@ class TestDesktopAgentSetValue:
 
     def test_set_value_without_surface(self):
         """set_value() returns error without surface adapter."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         result = asyncio.run(agent.set_value("name:Input", "test"))
@@ -71,8 +72,9 @@ class TestDesktopAgentSetValue:
 
     def test_set_value_returns_pattern_used_metadata(self):
         """set_value() should return pattern_used in result data."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -88,8 +90,9 @@ class TestDesktopAgentSetValue:
 
     def test_set_value_fallback_used_metadata(self):
         """set_value() should return fallback_used when ValuePattern unavailable."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -194,8 +197,9 @@ class TestMCPSetValueTool:
 
     def test_set_value_execution(self):
         """MCP _execute_set_value routes to agent.set_value."""
-        from deskaoy.transport.mcp_server import MCPServer
         import asyncio
+
+        from deskaoy.transport.mcp_server import MCPServer
 
         server = MCPServer()
         mock_agent = MagicMock()

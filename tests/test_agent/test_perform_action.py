@@ -12,11 +12,11 @@ Covers:
 from __future__ import annotations
 
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from deskaoy.results.types import ActionResult
+import pytest
 
+from deskaoy.results.types import ActionResult
 
 # ---------------------------------------------------------------------------
 # DesktopAgent.perform_action() facade
@@ -27,8 +27,9 @@ class TestDesktopAgentPerformAction:
 
     def test_perform_action_delegates_to_invoke_element(self):
         """perform_action() should call surface.invoke_element."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -45,8 +46,9 @@ class TestDesktopAgentPerformAction:
 
     def test_perform_action_with_value(self):
         """perform_action() forwards value to invoke_element."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -65,8 +67,9 @@ class TestDesktopAgentPerformAction:
 
     def test_perform_action_dry_run(self):
         """perform_action(dry_run=True) returns without executing."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -83,8 +86,9 @@ class TestDesktopAgentPerformAction:
 
     def test_perform_action_without_surface(self):
         """perform_action() returns error without surface adapter."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         result = asyncio.run(agent.perform_action("name:Btn", "invoke"))
@@ -93,8 +97,9 @@ class TestDesktopAgentPerformAction:
 
     def test_perform_action_toggle(self):
         """perform_action('toggle') dispatches correctly."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -109,8 +114,9 @@ class TestDesktopAgentPerformAction:
 
     def test_perform_action_expand(self):
         """perform_action('expand') dispatches correctly."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -222,8 +228,9 @@ class TestMCPPerformActionTool:
 
     def test_perform_action_execution(self):
         """MCP _execute_perform_action routes to agent.perform_action."""
-        from deskaoy.transport.mcp_server import MCPServer
         import asyncio
+
+        from deskaoy.transport.mcp_server import MCPServer
 
         server = MCPServer()
         mock_agent = MagicMock()

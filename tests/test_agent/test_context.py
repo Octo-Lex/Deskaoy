@@ -1,8 +1,6 @@
 """Tests for step context window (LangExtract pattern C)."""
 
-import pytest
-from deskaoy.agent.context import StepContext, build_step_context, _format_action
-
+from deskaoy.agent.context import StepContext, _format_action, build_step_context
 
 # ---------------------------------------------------------------------------
 # StepContext

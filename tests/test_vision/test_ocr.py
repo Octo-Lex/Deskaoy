@@ -1,9 +1,11 @@
 """Tests for OCRGrounding — text matching, box combining, quoted extraction."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
+import pytest
 
 from deskaoy.vision.ocr import OCRGrounding
-from deskaoy.vision.types import OCRWord, VisionLocation
+from deskaoy.vision.types import OCRWord
 
 
 def _words():
@@ -80,7 +82,7 @@ class TestOCRGroundingCombineBoxes:
         ocr = OCRGrounding()
         try:
             ocr._combine_boxes([])
-            assert False
+            pytest.fail()
         except ValueError:
             pass
 

@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import pytest
-
-from deskaoy.cascade.types import AXNode, AXSnapshot
 from deskaoy.cascade.resolver import (
     ElementFingerprint,
     MatchLevel,
-    ResolveResult,
     StaleRefResolver,
     fingerprint_from_node,
 )
-
+from deskaoy.cascade.types import AXNode, AXSnapshot
 
 # ---------------------------------------------------------------------------
 # Helpers

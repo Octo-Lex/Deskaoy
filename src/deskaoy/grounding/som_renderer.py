@@ -59,7 +59,7 @@ def render_som(
         Annotated PNG bytes.
     """
     try:
-        from PIL import Image, ImageDraw, ImageFont
+        from PIL import Image, ImageDraw
     except ImportError:
         logger.warning("Pillow not available — returning unannotated screenshot")
         return screenshot
@@ -119,7 +119,7 @@ def render_som(
 
 def _get_font(size: int) -> object:
     """Get a PIL font, falling back to default if necessary."""
-    from PIL import ImageFont
+    from PIL import ImageFont  # noqa: F401
 
     # Try common system fonts
     for name in ("arial.ttf", "DejaVuSans.ttf", "LiberationSans-Regular.ttf"):

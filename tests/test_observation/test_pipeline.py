@@ -15,36 +15,27 @@ Total: 40 tests
 
 from __future__ import annotations
 
-import asyncio
-import json
-import sys
 from dataclasses import dataclass
-from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 # ---------------------------------------------------------------------------
 # Module imports
 # ---------------------------------------------------------------------------
-
 from deskaoy.observation import (
     DesktopObservation,
     ObservationConfig,
     ObservationResult,
-    _PRESET_CONFIGS,
-    _VALID_PRESETS,
 )
-from deskaoy.observation_pipeline import ObservationPipeline
 from deskaoy.observation_ocr import (
     BuiltinOCRBackend,
-    OCRBackend,
     PaddleOCRBackend,
     TesseractOCRBackend,
     get_ocr_backend,
     list_available_engines,
 )
-
+from deskaoy.observation_pipeline import ObservationPipeline
 
 # ---------------------------------------------------------------------------
 # Fixtures — mock elements
@@ -114,7 +105,10 @@ def _mock_snapshot_store():
 def _mock_grounding_pipeline():
     """Create a mock GroundingPipeline."""
     from deskaoy.grounding.types import (
-        BBox, DetectionSource, ElementRole, FusedElement,
+        BBox,
+        DetectionSource,
+        ElementRole,
+        FusedElement,
     )
 
     pipeline = AsyncMock()
@@ -515,7 +509,7 @@ class TestMCPObserve:
     async def test_observe_tool_in_compact_list(self):
         """observe should not be in compact mode (uses task tool)."""
         tools = _build_mcp_tools(compact=True)
-        names = [t["name"] for t in tools]
+        [t["name"] for t in tools]
         # compact mode has 6 compound tools, observe is not separate
         assert len(tools) == 6
 
@@ -546,7 +540,7 @@ class TestRESTObserve:
     def test_observe_route_registered(self):
         """POST /observe route should be registered in the app."""
         try:
-            from aiohttp import web
+            from aiohttp import web  # noqa: F401
         except ImportError:
             pytest.skip("aiohttp not installed")
 
@@ -563,7 +557,7 @@ class TestRESTObserve:
     async def test_observe_handler_success(self):
         """observe handler should return pipeline result."""
         try:
-            from aiohttp import web
+            from aiohttp import web  # noqa: F401
         except ImportError:
             pytest.skip("aiohttp not installed")
 
@@ -573,7 +567,6 @@ class TestRESTObserve:
             pytest.skip("REST app creation failed")
 
         # Find the observe handler
-        from aiohttp.test_utils import AioHTTPTestCase, TestClient, TestServer
 
         # Simple approach: call handler directly
         # We'll just verify the function exists and is importable
@@ -597,6 +590,7 @@ class TestVersionBump:
     def test_pyproject_version_matches_cli(self):
         import tomllib
         from pathlib import Path
+
         from deskaoy.cli.version import VERSION
         pyproject = Path(__file__).resolve().parent.parent.parent / "pyproject.toml"
         with open(pyproject, "rb") as f:
@@ -609,10 +603,11 @@ class TestVersionBump:
         assert DesktopAgent.version == VERSION
 
     def test_all_three_versions_match(self):
-        from deskaoy.cli.version import VERSION
-        from deskaoy.desktop_agent import DesktopAgent
         import tomllib
         from pathlib import Path
+
+        from deskaoy.cli.version import VERSION
+        from deskaoy.desktop_agent import DesktopAgent
 
         cli_ver = VERSION
         da_ver = DesktopAgent.version
@@ -625,10 +620,11 @@ class TestVersionBump:
 
     def test_cli_version_command(self):
         """deskaoy version should print current version."""
-        from deskaoy.cli.version import VERSION
-        from deskaoy.cli.main import main
         import io
         from contextlib import redirect_stdout
+
+        from deskaoy.cli.main import main
+        from deskaoy.cli.version import VERSION
 
         buf = io.StringIO()
         with redirect_stdout(buf):

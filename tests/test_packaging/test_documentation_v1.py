@@ -1,7 +1,6 @@
 """BATCH-36 TASK-02: Documentation final pass tests."""
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest

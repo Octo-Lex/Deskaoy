@@ -10,27 +10,19 @@ Validates that all 5 wiring points are functional:
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from dataclasses import dataclass
-
 import pytest
 
 from deskaoy.desktop_agent import DesktopAgent
 from deskaoy.os_types import (
     AgentContext,
     AgentGoal,
-    AgentResult,
     CancellationToken,
-    Confidence,
     ResultStatus,
 )
-from deskaoy.results.types import ActionResult, ResultMeta, ActionMethod, ActionError
 from deskaoy.policy import PolicyBridge, PolicyDecision, PolicyEffect
-from deskaoy.trace_bridge import TraceBridge, ActionSpan
-from deskaoy.recovery_bridge import RecoveryBridge, RecoveryEventType
-from deskaoy.storage import StorageResolver
-
+from deskaoy.recovery_bridge import RecoveryBridge
+from deskaoy.results.types import ActionError, ActionMethod, ActionResult, ResultMeta
+from deskaoy.trace_bridge import ActionSpan, TraceBridge
 
 # ── Helpers ──────────────────────────────────────
 

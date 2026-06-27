@@ -15,12 +15,12 @@ Covers:
 """
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from deskaoy.os_types import AgentResult, ResultStatus, Confidence
-from deskaoy.agent.chat import AgentChat, ChatResult
+import pytest
 
+from deskaoy.agent.chat import AgentChat
+from deskaoy.os_types import AgentResult, Confidence, ResultStatus
 
 # ---------------------------------------------------------------------------
 # Mock agent

@@ -1,6 +1,6 @@
 """Tests for ModelCascade."""
 
-from deskaoy.budget.cascade import ModelCascade, DEFAULT_TIERS
+from deskaoy.budget.cascade import ModelCascade
 from deskaoy.budget.types import (
     CascadeConfig,
     CascadeTier,

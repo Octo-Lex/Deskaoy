@@ -92,7 +92,7 @@ class WindowsAdapter(SurfaceAdapter):
             raise ImportError(
                 "win32gui required for Windows adapter. "
                 "Install with: pip install pywin32"
-            )
+            ) from None
 
         try:
             import pyautogui
@@ -102,7 +102,7 @@ class WindowsAdapter(SurfaceAdapter):
             raise ImportError(
                 "pyautogui required for Windows adapter. "
                 "Install with: pip install pyautogui"
-            )
+            ) from None
 
     # =================================================================
     # Failsafe & Abort
@@ -844,7 +844,7 @@ class WindowsAdapter(SurfaceAdapter):
             import mss
             import mss.tools
         except ImportError:
-            raise ImportError("mss required for screenshots. pip install mss")
+            raise ImportError("mss required for screenshots. pip install mss") from None
 
         rect = self._get_window_rect()
         with mss.MSS() as sct:
@@ -1387,8 +1387,8 @@ class WindowsAdapter(SurfaceAdapter):
             hwnd = self._resolve_hwnd()
             element = walker.find_element_by_name(hwnd, target)
             if element:
-                import comtypes
-                from comtypes import GUID
+                import comtypes  # noqa: F401
+                from comtypes import GUID  # noqa: F401
                 try:
                     # UIA_IsEnabledPropertyId = 30022
                     state["enabled"] = element.GetCurrentPropertyValue(30022)

@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
 import pytest
 
 from deskaoy.routines import (
-    MIN_CRON_INTERVAL_SECONDS,
-    Routine,
-    RoutineScheduler,
     calculate_next_runs,
     compute_next_run,
     compute_previous_fire_time,
@@ -66,22 +62,22 @@ class TestComputeNextRunTimezone:
 
     def test_utc_default(self):
         """When no timezone specified, uses local time. When UTC specified, uses UTC."""
-        now = datetime(2025, 6, 15, 10, 0, tzinfo=timezone.utc)
+        now = datetime(2025, 6, 15, 10, 0, tzinfo=UTC)
         # Explicit UTC timezone
         result = compute_next_run("0 8 * * *", from_time=now.timestamp(), timezone_name="UTC")
-        next_dt = datetime.fromtimestamp(result, tz=timezone.utc)
+        next_dt = datetime.fromtimestamp(result, tz=UTC)
         assert next_dt.hour == 8
         assert next_dt.minute == 0
 
     def test_new_york_timezone(self):
         """America/New_York is UTC-4 (summer) or UTC-5 (winter)."""
         # Winter time: Jan 15, 10am UTC = 5am NYC
-        now = datetime(2025, 1, 15, 10, 0, tzinfo=timezone.utc)
+        now = datetime(2025, 1, 15, 10, 0, tzinfo=UTC)
         # Schedule 8am NYC = 13:00 UTC in winter
         result = compute_next_run(
             "0 8 * * *", from_time=now.timestamp(), timezone_name="America/New_York",
         )
-        next_dt = datetime.fromtimestamp(result, tz=timezone.utc)
+        next_dt = datetime.fromtimestamp(result, tz=UTC)
         # 8am NYC winter = 13:00 UTC, which is after 10:00 UTC
         assert next_dt.hour == 13
         assert next_dt.minute == 0
@@ -89,12 +85,12 @@ class TestComputeNextRunTimezone:
     def test_tokyo_timezone(self):
         """Asia/Tokyo is UTC+9."""
         # Jan 15, 3am UTC = 12pm Tokyo
-        now = datetime(2025, 1, 15, 3, 0, tzinfo=timezone.utc)
+        now = datetime(2025, 1, 15, 3, 0, tzinfo=UTC)
         # Schedule 9am Tokyo — should be Jan 16 0:00 UTC (9am Tokyo)
         result = compute_next_run(
             "0 9 * * *", from_time=now.timestamp(), timezone_name="Asia/Tokyo",
         )
-        next_dt = datetime.fromtimestamp(result, tz=timezone.utc)
+        next_dt = datetime.fromtimestamp(result, tz=UTC)
         assert next_dt.hour == 0  # 9am Tokyo = 0:00 UTC
 
 

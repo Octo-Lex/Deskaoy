@@ -1,10 +1,8 @@
 """Tests for safety gate tier-based action evaluation."""
 
-import pytest
 
 from deskaoy.safety.gate import (
     ActionTier,
-    SafetyDecision,
     classify_tool,
     evaluate,
 )

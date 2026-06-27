@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock
-
-import pytest
 
 from deskaoy.budget.client import BudgetAwareLLMClient
 from deskaoy.tracing.flow_logger import FlowLogger
@@ -63,10 +60,6 @@ class TestBudgetClientMiddleware:
 
     def test_middleware_param_is_optional(self):
         """BudgetAwareLLMClient defaults middleware to None."""
-        from deskaoy.budget.governor import TokenBudgetGovernor
-        from deskaoy.budget.cascade import ModelCascade
-        from deskaoy.budget.credential_pool import CredentialPool
-        from deskaoy.budget.compressor import ContextCompressor
 
         # Just verify the constructor accepts omitting middleware
         import inspect

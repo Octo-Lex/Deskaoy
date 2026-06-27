@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 _HAS_PADDLE = False
 try:
-    from paddleocr import PaddleOCR
+    from paddleocr import PaddleOCR  # noqa: F401
     _HAS_PADDLE = True
 except ImportError:
     pass

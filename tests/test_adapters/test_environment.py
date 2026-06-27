@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 import asyncio
+
 import pytest
 
 from deskaoy.adapters.environment import (
-    Environment,
-    EnvironmentState,
-    EnvironmentInfo,
-    LocalDesktop,
     DockerDesktop,
+    Environment,
+    EnvironmentInfo,
+    EnvironmentState,
+    LocalDesktop,
     RemoteVM,
 )
 

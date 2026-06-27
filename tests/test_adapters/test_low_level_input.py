@@ -1,13 +1,12 @@
 """BATCH-18/TASK-01: Low-level input primitive tests."""
 from __future__ import annotations
 
-import asyncio
-
-import pytest
 from unittest.mock import MagicMock
 
-from deskaoy.cascade.protocol import SurfaceAdapter
+import pytest
+
 from deskaoy.adapters.windows import WindowsAdapter
+from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.results.types import ErrorCategory
 
 

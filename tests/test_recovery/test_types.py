@@ -1,3 +1,5 @@
+import pytest
+
 """Tests for recovery types: enums, dataclasses, fingerprints."""
 
 from deskaoy.recovery.types import (
@@ -5,7 +7,6 @@ from deskaoy.recovery.types import (
     ActionRecord,
     ClassifiedError,
     ErrorType,
-    NudgePayload,
     RecoveryEvent,
     RecoveryHint,
     RecoveryStrategy,
@@ -64,7 +65,7 @@ class TestActionFingerprint:
         fp = ActionFingerprint(action_type="click", target="#btn")
         try:
             fp.action_type = "fill"
-            assert False, "Should be frozen"
+            pytest.fail("Should be frozen")
         except AttributeError:
             pass
 
@@ -74,7 +75,7 @@ class TestRecoveryHint:
         h = RecoveryHint(strategy=RecoveryStrategy.RETRY, retryable=True)
         try:
             h.strategy = RecoveryStrategy.ABORT
-            assert False, "Should be frozen"
+            pytest.fail("Should be frozen")
         except AttributeError:
             pass
 

@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -12,12 +10,10 @@ import pytest
 from deskaoy.safety.evidence_ledger import (
     GENESIS_HASH,
     EvidenceLedger,
-    IntegrityReport,
     LedgerEntry,
     _compute_hash,
     _iso_now,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -218,8 +214,8 @@ class TestResume:
         # Write 3 entries
         ld1 = EvidenceLedger(path)
         await ld1.init()
-        e1 = await ld1.append("s1", "e1", {"x": 1})
-        e2 = await ld1.append("s1", "e2", {"x": 2})
+        await ld1.append("s1", "e1", {"x": 1})
+        await ld1.append("s1", "e2", {"x": 2})
         e3 = await ld1.append("s1", "e3", {"x": 3})
         await ld1.close()
 

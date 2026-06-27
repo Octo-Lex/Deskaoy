@@ -1,15 +1,13 @@
 """Tests for post-action grounding verification (LangExtract pattern A)."""
 
-import pytest
 from deskaoy.verification.grounding import (
+    TIER_CONFIDENCE,
     ActionGrounding,
     GroundingTier,
-    TIER_CONFIDENCE,
-    verify_grounding,
     _detect_property_changes,
     _find_by_bounds,
+    verify_grounding,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

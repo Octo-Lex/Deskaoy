@@ -139,7 +139,7 @@ class Environment(ABC):
                     "macOS adapter requires pyobjc. "
                     "Install with: pip install pyobjc-framework-ApplicationServices "
                     "pyobjc-framework-Quartz"
-                )
+                ) from None
         elif sys.platform == "win32":
             try:
                 from deskaoy.adapters.windows import WindowsAdapter
@@ -148,7 +148,7 @@ class Environment(ABC):
                 raise ImportError(
                     "Windows adapter requires pywin32. "
                     "Install with: pip install pywin32"
-                )
+                ) from None
         elif sys.platform == "linux":
             try:
                 from deskaoy.adapters.linux import LinuxAdapter
@@ -157,7 +157,7 @@ class Environment(ABC):
                 raise ImportError(
                     "Linux adapter requires python3-atspi. "
                     "Install with: sudo apt install python3-atspi"
-                )
+                ) from None
         else:
             raise ImportError(
                 f"No surface adapter available for platform: {sys.platform}"

@@ -2,19 +2,17 @@
 from __future__ import annotations
 
 import asyncio
-import pytest
 
 from deskaoy.agent.cua_loop import (
-    CUALoop,
     CUAAction,
+    CUAActionProposal,
+    CUALoop,
+    CUALoopResult,
     CUAProvider,
     CUAStep,
-    CUALoopResult,
-    CUAActionProposal,
-    parse_openai_cua_response,
     parse_anthropic_cua_response,
+    parse_openai_cua_response,
 )
-
 
 # ---------------------------------------------------------------------------
 # Response Parser Tests

@@ -1,9 +1,6 @@
 """Tests for Windows adapter safety features and Bezier constraints."""
 
-import asyncio
 import math
-import random
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -13,7 +10,6 @@ from deskaoy.input.bezier import (
 )
 from deskaoy.input.jitter import randomize_click_point
 from deskaoy.input.types import HumanizationConfig, Point, Rect
-
 
 # =============================================================================
 # Bezier Control Point Constraints (Feedback Point #3)

@@ -11,8 +11,6 @@ import threading
 import time
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from deskaoy.feedback.engine import (
     Bounds,
     FeedbackConfig,
@@ -20,7 +18,6 @@ from deskaoy.feedback.engine import (
     ScrollDirection,
     TrailPoint,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

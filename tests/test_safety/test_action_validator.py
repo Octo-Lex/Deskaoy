@@ -2,13 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
-
 from deskaoy.safety.action_validator import (
     ACTION_SPECS,
-    ActionValidationResult,
     ParameterSpec,
-    ValidationIssue,
     validate_action,
 )
 

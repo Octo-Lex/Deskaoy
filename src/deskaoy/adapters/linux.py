@@ -131,7 +131,7 @@ class LinuxAdapter(SurfaceAdapter):
             raise ImportError(
                 "Pillow required for Linux screenshots. "
                 "Install with: pip install Pillow"
-            )
+            ) from None
 
     # ------------------------------------------------------------------
     # Accessibility tree (snapshot)

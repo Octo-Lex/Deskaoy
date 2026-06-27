@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 _HAS_YOLO = False
 try:
-    from ultralytics import YOLO
+    from ultralytics import YOLO  # noqa: F401
     _HAS_YOLO = True
 except ImportError:
     pass

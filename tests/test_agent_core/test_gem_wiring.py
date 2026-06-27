@@ -9,18 +9,13 @@ Proves that:
 
 from __future__ import annotations
 
-import asyncio
 import pytest
 
+from deskaoy.cascade.resolver import ElementFingerprint, MatchLevel, StaleRefResolver
 from deskaoy.cascade.types import AXNode, AXSnapshot
-from deskaoy.cascade.formatter import format_snapshot
-from deskaoy.cascade.resolver import StaleRefResolver, ElementFingerprint, MatchLevel
-from deskaoy.hooks import HookName, HookContext, hooks as global_hooks
-from deskaoy.pipeline.registry import PipelineRegistry
-from deskaoy.pipeline.executor import PipelineExecutor
-from deskaoy.pipeline.types import PipelineDefinition, PipelineStep
+from deskaoy.hooks import HookContext, HookName
+from deskaoy.hooks import hooks as global_hooks
 from deskaoy.results.types import ActionError, make_error
-
 
 # ---------------------------------------------------------------------------
 # 1. Formatter wired into to_compact_str

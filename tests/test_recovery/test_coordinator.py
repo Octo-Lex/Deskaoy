@@ -1,13 +1,12 @@
 """Tests for RecoveryCoordinator — full pipeline orchestration."""
 
 import asyncio
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from deskaoy.recovery.coordinator import RecoveryCoordinator
 from deskaoy.recovery.types import (
-    ActionRecord,
-    RecoveryStrategy,
     WatchdogEvent,
 )
 
@@ -88,7 +87,7 @@ class TestExecuteWithRecovery:
                 r.ok = call_count > 2
                 return r
 
-            result = await coord.execute_with_recovery(
+            await coord.execute_with_recovery(
                 action, {"action_type": "click", "target": "#btn"},
             )
             history = coord.get_recovery_history()
@@ -110,7 +109,7 @@ class TestExecuteWithRecovery:
                 await coord.execute_with_recovery(
                     fail_action, {"action_type": "click", "target": "#btn"},
                 )
-                assert False, "Should have raised"
+                pytest.fail(), "Should have raised"
             except RuntimeError:
                 pass
 
@@ -196,6 +195,7 @@ class TestM22RecoveryPublicAttr:
 
     def test_session_recovery_uses_public_page(self):
         import inspect
+
         from deskaoy.recovery.session_recovery import SessionRecovery
         source = inspect.getsource(SessionRecovery)
         assert '"_page"' not in source and "'_page'" not in source, (

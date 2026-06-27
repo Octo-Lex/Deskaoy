@@ -21,11 +21,12 @@ class TestVersionConsistency:
     """Verify version is single-sourced correctly."""
 
     def test_cli_version_matches_pyproject(self):
-        from deskaoy.cli.version import VERSION
         import tomllib
+
+        from deskaoy.cli.version import VERSION
         with open(PROJECT_ROOT / "pyproject.toml", "rb") as f:
             pyproject_ver = tomllib.load(f)["project"]["version"]
-        assert VERSION == pyproject_ver, f"cli={VERSION} != pyproject={pyproject_ver}"
+        assert pyproject_ver == VERSION, f"cli={VERSION} != pyproject={pyproject_ver}"
 
     def test_agent_version_matches_pyproject(self):
         import tomllib
@@ -136,9 +137,10 @@ class TestSafetySystem:
         assert len(SENSITIVE_APPS) >= 14
 
     def test_health_check_structure(self):
-        from deskaoy.safety.health import HealthCheck
         import asyncio
         from unittest.mock import MagicMock
+
+        from deskaoy.safety.health import HealthCheck
 
         agent = MagicMock()
         agent._surface = None
@@ -180,9 +182,10 @@ class TestSurfaceAdapterProtocol:
 
     def test_key_press_checks_blocklist(self):
         """Verify key_press method checks the blocklist."""
-        from deskaoy.adapters.windows import WindowsAdapter
-        from unittest.mock import MagicMock
         import asyncio
+        from unittest.mock import MagicMock
+
+        from deskaoy.adapters.windows import WindowsAdapter
 
         adapter = WindowsAdapter(hwnd=1)
         adapter._win32gui = MagicMock()

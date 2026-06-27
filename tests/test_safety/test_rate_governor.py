@@ -1,7 +1,6 @@
 """Tests for ActionRateGovernor — token-bucket rate limiter."""
 
-import time
-from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit, DEFAULT_LIMITS
+from deskaoy.safety.rate_governor import DEFAULT_LIMITS, ActionRateGovernor, RateLimit
 
 
 class TestRateLimit:

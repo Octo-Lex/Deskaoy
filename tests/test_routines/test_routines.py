@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -13,11 +12,10 @@ from deskaoy.routines import (
     Routine,
     RoutineExecution,
     RoutineScheduler,
-    compute_next_run,
     _parse_field,
     _resolve_schedule,
+    compute_next_run,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Unit: cron parsing

@@ -16,7 +16,7 @@ Covers:
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -24,21 +24,9 @@ from deskaoy.desktop_agent import DesktopAgent
 from deskaoy.os_types import (
     AgentContext,
     AgentGoal,
-    AgentResult,
-    Confidence,
-    Issue,
-    IssueSeverity,
     ResultStatus,
-    ErrorCode,
 )
-from deskaoy.results.types import ActionResult, ActionError, ErrorCategory
-from deskaoy.runtime.types import (
-    RuntimeAttemptState,
-    RuntimeExecutionReceipt,
-    PreflightResult,
-    AdapterCapabilities,
-)
-
+from deskaoy.results.types import ActionError, ActionResult, ErrorCategory
 
 # ---------------------------------------------------------------------------
 # Helpers

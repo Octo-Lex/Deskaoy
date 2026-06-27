@@ -10,25 +10,22 @@ real YOLO/Florence-2/PaddleOCR models. They are gated behind the
 
 from __future__ import annotations
 
-import asyncio
-import os
 from io import BytesIO
 from pathlib import Path
 
 import pytest
 
-from deskaoy.grounding.types import FusedElement, GroundingResult
-from deskaoy.grounding.pipeline import GroundingPipeline
+from deskaoy.grounding.anchor import build_anchor_map
 from deskaoy.grounding.detector import OmniParserDetector
 from deskaoy.grounding.fusion import FusionEngine
-from deskaoy.grounding.anchor import compute_anchor, build_anchor_map
+from deskaoy.grounding.pipeline import GroundingPipeline
 from deskaoy.grounding.som_renderer import render_som
+from deskaoy.grounding.types import FusedElement, GroundingResult
 
 # Check if ML deps are available
 pytestmark = pytest.mark.grounding
 
 try:
-    from PIL import Image
     HAS_PIL = True
 except ImportError:
     HAS_PIL = False
@@ -44,7 +41,7 @@ def _make_test_screenshot(w: int = 800, h: int = 600) -> bytes:
     draw = ImageDraw.Draw(img)
 
     # Draw some button-like rectangles
-    for i, (x, y, text) in enumerate([
+    for _i, (x, y, text) in enumerate([
         (50, 50, "Submit"),
         (200, 50, "Cancel"),
         (350, 50, "Settings"),
@@ -96,7 +93,7 @@ class TestFusionIntegration:
         assert len(submit_els) >= 1
 
     def test_anchor_stability(self):
-        from deskaoy.grounding.types import BBox, DetectionSource, ElementRole
+        from deskaoy.grounding.types import BBox, ElementRole
 
         elements = [
             FusedElement(BBox(50, 50, 150, 85), ElementRole.BUTTON, "Submit", 0.9),

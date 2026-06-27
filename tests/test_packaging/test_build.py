@@ -1,9 +1,6 @@
 """BATCH-22: Package build and PyPI readiness tests."""
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 import tarfile
 import zipfile
 from pathlib import Path

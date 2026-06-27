@@ -1,11 +1,8 @@
 """Tests for CredentialPool."""
 
-import json
-import time
-from pathlib import Path
 
 from deskaoy.budget.credential_pool import CredentialPool
-from deskaoy.budget.types import CredentialRotated, SelectionStrategy
+from deskaoy.budget.types import SelectionStrategy
 
 
 class TestCredentialPoolRegister:

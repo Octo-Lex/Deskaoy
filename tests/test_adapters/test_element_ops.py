@@ -1,10 +1,9 @@
 """BATCH-19: Element operations tests — invoke_element + get_element_state."""
 from __future__ import annotations
 
-import asyncio
+from unittest.mock import MagicMock
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 from deskaoy.adapters.windows import WindowsAdapter
 from deskaoy.results.types import ActionResult

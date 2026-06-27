@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -9,10 +10,9 @@ from deskaoy.agent.cua_loop import (
     CUAAction,
     CUALoop,
     CUAProvider,
-    parse_openai_cua_response,
     parse_anthropic_cua_response,
+    parse_openai_cua_response,
 )
-from unittest.mock import AsyncMock, MagicMock
 
 
 class TestCUAStubMode:
@@ -79,7 +79,7 @@ class TestResponseParsers:
         loop = CUALoop(adapter=adapter)
         from deskaoy.agent.cua_loop import CUAActionProposal
         proposal = CUAActionProposal(action=CUAAction.CLICK, params={"x": 100, "y": 200})
-        result = await loop._execute_action(proposal)
+        await loop._execute_action(proposal)
         adapter.click.assert_called_once_with("100,200")
 
 
@@ -93,8 +93,13 @@ class TestLiveOpenAICUA:
     @pytest.mark.asyncio
     async def test_live_openai_cua(self):
         """TEST-21-06: Live CUA loop with OpenAI."""
+        import subprocess
+        import time
+
+        import win32con
+        import win32gui
+
         from deskaoy.adapters.windows import WindowsAdapter
-        import subprocess, time, win32gui, win32con
 
         proc = subprocess.Popen(["notepad.exe"])
         time.sleep(2.0)
@@ -129,8 +134,13 @@ class TestLiveAnthropicCUA:
     @pytest.mark.asyncio
     async def test_live_anthropic_cua(self):
         """TEST-21-07: Live CUA loop with Anthropic."""
+        import subprocess
+        import time
+
+        import win32con
+        import win32gui
+
         from deskaoy.adapters.windows import WindowsAdapter
-        import subprocess, time, win32gui, win32con
 
         proc = subprocess.Popen(["notepad.exe"])
         time.sleep(2.0)

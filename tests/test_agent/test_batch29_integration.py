@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 import json
-import pytest
-import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from deskaoy.os_types import AgentResult, ResultStatus, Confidence
-from deskaoy.results.types import ActionResult
+import pytest
+
+from deskaoy.os_types import AgentResult, Confidence, ResultStatus
 
 # Re-export for convenience in tests
 _AgentResult = AgentResult

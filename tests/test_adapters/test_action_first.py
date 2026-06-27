@@ -15,9 +15,8 @@ into ``sys.modules`` so the pattern helpers succeed without real COM.
 
 from __future__ import annotations
 
-import asyncio
 import sys
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -110,7 +109,6 @@ from deskaoy.adapters.uia_walker import (
     PatternActionResult,
     UIAElement,
     UIAWalker,
-    WalkerConfig,
     _try_collapse_pattern,
     _try_expand_pattern,
     _try_invoke_pattern,
@@ -121,17 +119,12 @@ from deskaoy.adapters.uia_walker import (
 )
 from deskaoy.adapters.windows import WindowsAdapter
 from deskaoy.cascade.snapshot_types import (
-    ROLE_ALIASES,
-    ROLE_PREFIXES,
     _ROLE_ALIASES,
     _ROLE_PREFIXES,
-    assign_element_ids,
-    get_role_prefix,
-    validate_element_id,
+    ROLE_ALIASES,
+    ROLE_PREFIXES,
 )
 from deskaoy.input.types import HumanizationConfig
-from deskaoy.results.types import ActionResult
-
 
 # =================================================================
 # Helpers
@@ -165,7 +158,7 @@ def _make_raw_element(
     rect.bottom = 240
     mock.CurrentBoundingRectangle = rect
 
-    def _get_pattern(pattern_id: int) -> Optional[MagicMock]:
+    def _get_pattern(pattern_id: int) -> MagicMock | None:
         """Simulate GetCurrentPattern returning patterns when supported."""
         pattern_map = {
             10000: has_invoke,
@@ -711,10 +704,10 @@ class TestVersionAndValidation:
         assert all(p.isdigit() for p in parts), f"Invalid semver: {VERSION}"
 
         # Also check desktop_agent.py version matches
-        from deskaoy.desktop_agent import DesktopAgent
         import inspect
-        from deskaoy import desktop_agent
         import re
+
+        from deskaoy import desktop_agent
         source = inspect.getsource(desktop_agent)
         match = re.search(r'version.*?=\s*["\']([\d.]+)["\']', source)
         if match:
@@ -740,25 +733,13 @@ class TestVersionAndValidation:
         """TEST-25-04-03: No regression — key exports still available."""
         # Verify all public APIs are still importable
         from deskaoy.adapters.uia_walker import (
-            UIAWalker,
-            UIAElement,
-            WalkerConfig,
-            PatternActionResult,
-            UIA_INVOKE_PATTERN_ID,
-            UIA_VALUE_PATTERN_ID,
-            UIA_TOGGLE_PATTERN_ID,
             UIA_EXPAND_COLLAPSE_PATTERN_ID,
-            UIA_SELECTION_ITEM_PATTERN_ID,
+            UIA_INVOKE_PATTERN_ID,
             UIA_SCROLL_ITEM_PATTERN_ID,
+            UIA_SELECTION_ITEM_PATTERN_ID,
+            UIA_TOGGLE_PATTERN_ID,
+            UIA_VALUE_PATTERN_ID,
         )
-        from deskaoy.cascade.snapshot_types import (
-            ROLE_PREFIXES,
-            ROLE_ALIASES,
-            assign_element_ids,
-            get_role_prefix,
-            validate_element_id,
-        )
-        from deskaoy.adapters.windows import WindowsAdapter
 
         # Verify snapshot_types backward compat
         assert _ROLE_PREFIXES is ROLE_PREFIXES

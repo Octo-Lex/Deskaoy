@@ -7,9 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from deskaoy.recovery.event_bus import WatchdogEventBus
-from deskaoy.recovery.types import ActionFingerprint, WatchdogEvent
+from deskaoy.recovery.types import ActionFingerprint
 from deskaoy.recovery.watchdogs import (
-    BaseWatchdog,
     CrashWatchdog,
     LoopWatchdog,
     NavigationWatchdog,

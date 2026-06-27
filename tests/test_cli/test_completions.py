@@ -7,7 +7,6 @@ import pytest
 
 from deskaoy.cli.completions import CompletionGenerator
 
-
 # ------------------------------------------------------------------
 # Fixtures — mock argparse parsers
 # ------------------------------------------------------------------

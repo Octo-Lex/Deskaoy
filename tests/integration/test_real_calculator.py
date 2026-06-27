@@ -24,8 +24,8 @@ pytestmark = [
 @pytest.fixture()
 def calc_hwnd():
     """Launch Calculator, find hwnd, yield, then kill."""
-    import win32gui
     import win32con
+    import win32gui
 
     proc = subprocess.Popen("calc.exe")
     time.sleep(2.5)
@@ -108,8 +108,8 @@ class TestRealCalculator:
 @pytest.fixture()
 def explorer_hwnd():
     """Launch Explorer, find hwnd, yield, then kill."""
-    import win32gui
     import win32con
+    import win32gui
 
     proc = subprocess.Popen("explorer.exe")
     time.sleep(3.0)

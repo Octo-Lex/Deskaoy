@@ -5,40 +5,37 @@ Uses Hypothesis to generate edge-case inputs and verify invariants hold.
 
 Layer 1 of the stress testing strategy.
 """
-import pytest
-import json
-import math
 import time
-from datetime import datetime, timezone
-from hypothesis import given, settings, assume, HealthCheck
+
+import pytest
+from hypothesis import HealthCheck, given, settings
 from hypothesis.strategies import (
-    text, characters, integers, floats, booleans, lists, tuples,
-    dictionaries, one_of, none, binary, builds, just, recursive,
-    composite, sampled_from,
+    booleans,
+    characters,
+    composite,
+    floats,
+    integers,
+    lists,
+    none,
+    one_of,
+    sampled_from,
+    text,
 )
 
-# ── Imports ──────────────────────────────────────────────────────────────
-
-from deskaoy.safety.injection import PromptInjectionDetector
-from deskaoy.safety.key_blocklist import is_blocked_key, block_reason
-from deskaoy.safety.cost_tracker import CostTracker
-from deskaoy.safety.latency_budget import LatencyBudget, LatencyMeasurement
-from deskaoy.safety.timeout_guard import TimeoutGuard
-from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
-
-from deskaoy.memory.facts import Fact, FactStore
-from deskaoy.memory.store import ActionMemory
-
-from deskaoy.cascade.cache import TierPreferenceCache, CacheEntry
+from deskaoy.cascade.cache import CacheEntry
 from deskaoy.cascade.types import Tier
-
+from deskaoy.memory.facts import Fact, FactStore
+from deskaoy.orchestration.blackboard import Blackboard
+from deskaoy.performance import LatencyProfiler
 from deskaoy.recovery.format_validator import FormatValidator, ValidationResult
 from deskaoy.recovery.retry_tracker import RetryTracker
+from deskaoy.safety.cost_tracker import CostTracker
 
-from deskaoy.orchestration.blackboard import Blackboard
-
-from deskaoy.performance import LatencyProfiler
-
+# ── Imports ──────────────────────────────────────────────────────────────
+from deskaoy.safety.injection import PromptInjectionDetector
+from deskaoy.safety.key_blocklist import block_reason, is_blocked_key
+from deskaoy.safety.latency_budget import LatencyBudget, LatencyMeasurement
+from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
 
 # ══════════════════════════════════════════════════════════════════════════
 # Helper strategies (must be defined before use)
@@ -123,7 +120,7 @@ class TestCostTrackerProperty:
     def test_costs_never_negative_after_records(self, n_records, budget):
         """After recording any sequence of costs, total_cost >= 0."""
         tracker = CostTracker(budget_usd=budget)
-        for i in range(n_records):
+        for _i in range(n_records):
             tracker.record(
                 provider="openai", model="gpt-4",
                 input_tokens=100, output_tokens=50,

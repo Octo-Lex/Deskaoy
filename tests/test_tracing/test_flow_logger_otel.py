@@ -17,8 +17,7 @@ from opentelemetry.trace import StatusCode
 
 from deskaoy.tracing.flow_logger import FlowLogger, _current_context
 from deskaoy.tracing.runtime import TelemetryConfig, TelemetryRuntime
-from deskaoy.tracing.types import SpanKind, SpanStatus
-
+from deskaoy.tracing.types import SpanKind
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -186,9 +185,8 @@ class TestEventsBuffer:
         logger = FlowLogger(runtime=rt)
 
         async def _test():
-            async with logger.trace("s1") as ctx:
-                async with logger.span(SpanKind.ACTION, "click"):
-                    pass
+            async with logger.trace("s1"), logger.span(SpanKind.ACTION, "click"):
+                pass
 
         asyncio.run(_test())
         # Check internal events dict has entries
@@ -244,16 +242,15 @@ class TestRedactionWithRuntime:
         logger = FlowLogger(runtime=rt)
 
         async def _test():
-            async with logger.trace("s1"):
-                async with logger.span(
-                    SpanKind.ACTION,
-                    "login",
-                    attributes={
-                        "url": "https://example.com?password=secret123&user=alice",
-                        "normal_field": "visible",
-                    },
-                ):
-                    pass
+            async with logger.trace("s1"), logger.span(
+                SpanKind.ACTION,
+                "login",
+                attributes={
+                    "url": "https://example.com?password=secret123&user=alice",
+                    "normal_field": "visible",
+                },
+            ):
+                pass
             rt.force_flush()
 
         asyncio.run(_test())
