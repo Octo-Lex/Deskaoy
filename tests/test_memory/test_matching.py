@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from deskaoy.cascade.types import AXNode, AXSnapshot
 from deskaoy.memory.matching import (
     _ANCHOR_BASE_SCORES,
@@ -20,7 +18,6 @@ from deskaoy.memory.types import (
     HealStrategy,
     TierRecord,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

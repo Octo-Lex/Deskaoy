@@ -3,6 +3,8 @@
 import asyncio
 from unittest.mock import MagicMock
 
+import pytest
+
 from deskaoy.tracing.flow_logger import FlowLogger
 from deskaoy.tracing.middleware import LLMLoggingMiddleware
 from deskaoy.tracing.types import SpanKind
@@ -60,7 +62,7 @@ class TestLLMLoggingMiddleware:
             async with logger.trace("s1"):
                 try:
                     await mw.wrap(fail_fn, provider="anthropic", model="test")
-                    assert False, "should raise"
+                    pytest.fail("should raise")
                 except RuntimeError:
                     pass
 

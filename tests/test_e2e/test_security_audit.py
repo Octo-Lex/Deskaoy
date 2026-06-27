@@ -9,13 +9,9 @@ Tests cover:
 from __future__ import annotations
 
 import re
-import sys
-import time
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 # =================================================================
 # 1. Credential Leak Scan
@@ -106,7 +102,7 @@ class TestCLIInputValidation:
         check moved from argparse to _build_goal, which raises SystemExit for
         automate without an instruction.
         """
-        from deskaoy.cli.main import _build_parser, _build_goal
+        from deskaoy.cli.main import _build_goal, _build_parser
 
         parser = _build_parser()
         # Parsing succeeds (instruction is optional)

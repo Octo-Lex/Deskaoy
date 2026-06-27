@@ -5,28 +5,20 @@ Runs operations in tight loops for extended periods and watches for degradation.
 
 Layer 4 of the stress testing strategy.
 """
-import pytest
-import time
-import os
-import tracemalloc
 import tempfile
+import time
+import tracemalloc
 from pathlib import Path
 
-
-# ── Imports ──────────────────────────────────────────────────────────────
-
-from deskaoy.safety.cost_tracker import CostTracker
-from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
-from deskaoy.safety.latency_budget import LatencyBudget
+import pytest
 
 from deskaoy.memory.facts import Fact, FactStore
-
-from deskaoy.recovery.retry_tracker import RetryTracker
-
 from deskaoy.orchestration.blackboard import Blackboard
-
 from deskaoy.performance import LatencyProfiler, LRUCache
 
+# ── Imports ──────────────────────────────────────────────────────────────
+from deskaoy.safety.cost_tracker import CostTracker
+from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
 
 # ══════════════════════════════════════════════════════════════════════════
 # 1. MEMORY LEAK DETECTION
@@ -59,7 +51,7 @@ class TestMemoryLeaks:
         tracemalloc.start()
         tracker = CostTracker(budget_usd=1000000)
 
-        for i in range(100000):
+        for _i in range(100000):
             tracker.record("openai", "gpt-4", input_tokens=100, output_tokens=50)
 
         current, peak = tracemalloc.get_traced_memory()

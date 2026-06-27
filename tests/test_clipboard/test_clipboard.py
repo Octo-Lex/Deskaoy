@@ -12,11 +12,11 @@ Covers:
 from __future__ import annotations
 
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from deskaoy.results.types import ActionResult
+import pytest
 
+from deskaoy.results.types import ActionResult
 
 # ---------------------------------------------------------------------------
 # SurfaceAdapter.paste() default implementation
@@ -60,8 +60,9 @@ class TestDesktopAgentClipboard:
 
     def test_read_clipboard_delegates_to_surface(self):
         """read_clipboard() should call surface.read_clipboard()."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -74,8 +75,9 @@ class TestDesktopAgentClipboard:
 
     def test_read_clipboard_raises_without_surface(self):
         """read_clipboard() should raise RuntimeError without surface."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         with pytest.raises(RuntimeError, match="No surface adapter"):
@@ -83,8 +85,9 @@ class TestDesktopAgentClipboard:
 
     def test_write_clipboard_delegates_to_surface(self):
         """write_clipboard() should call surface.write_clipboard()."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -96,8 +99,9 @@ class TestDesktopAgentClipboard:
 
     def test_write_clipboard_raises_without_surface(self):
         """write_clipboard() should raise RuntimeError without surface."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         with pytest.raises(RuntimeError, match="No surface adapter"):
@@ -105,8 +109,9 @@ class TestDesktopAgentClipboard:
 
     def test_paste_delegates_to_surface(self):
         """paste() should call surface.paste()."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         mock_surface = MagicMock()
@@ -119,8 +124,9 @@ class TestDesktopAgentClipboard:
 
     def test_paste_returns_error_without_surface(self):
         """paste() should return ActionResult(ok=False) without surface."""
-        from deskaoy.desktop_agent import DesktopAgent
         import asyncio
+
+        from deskaoy.desktop_agent import DesktopAgent
 
         agent = DesktopAgent()
         result = asyncio.run(agent.paste())

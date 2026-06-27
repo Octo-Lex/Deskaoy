@@ -6,18 +6,14 @@ mocked platform detection.
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from deskaoy.adapters.environment import (
     Environment,
-    EnvironmentInfo,
-    EnvironmentState,
     LocalDesktop,
 )
-
 
 # ---------------------------------------------------------------------------
 # TASK-02 Tests: Platform Detection (8 tests)

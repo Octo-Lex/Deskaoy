@@ -10,6 +10,10 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from PIL import Image
 
 logger = logging.getLogger(__name__)
 

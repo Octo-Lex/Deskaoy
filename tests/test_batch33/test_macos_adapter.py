@@ -6,7 +6,6 @@ Uses the mock pattern from BATCH-33-BLUEPRINT:
 """
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
 from unittest.mock import MagicMock, patch
@@ -24,8 +23,6 @@ pytestmark = pytest.mark.skipif(
 
 from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.cascade.types import AXSnapshot
-from deskaoy.results.types import ActionResult
-
 
 # =================================================================
 # Helpers — mock pyobjc modules

@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
 from deskaoy.utils.shape import infer_shape
-
 
 # ---------------------------------------------------------------------------
 # Primitives

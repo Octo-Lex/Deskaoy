@@ -27,9 +27,9 @@ class TestVersionBump:
 
     def test_version_consistency_across_files(self):
         """All single-source files agree on the same version."""
+        import deskaoy
         from deskaoy.cli.version import VERSION as cli_ver
         from deskaoy.desktop_agent import DesktopAgent
-        import deskaoy
 
         with open(_PROJECT_ROOT / "pyproject.toml", "rb") as f:
             pyproject_ver = tomllib.load(f)["project"]["version"]
@@ -58,7 +58,7 @@ class TestVersionBump:
         """CLI and DesktopAgent versions match."""
         from deskaoy.cli.version import VERSION
         from deskaoy.desktop_agent import DesktopAgent
-        assert VERSION == DesktopAgent.version
+        assert DesktopAgent.version == VERSION
 
     def test_init_version_matches_cli(self):
         """deskaoy.__version__ matches CLI version."""

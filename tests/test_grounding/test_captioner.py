@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 from io import BytesIO
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
+from deskaoy.grounding.captioner import FlorenceCaptioner
 from deskaoy.grounding.types import (
     BBox,
     DetectionSource,
     ElementRole,
     FusedElement,
 )
-from deskaoy.grounding.captioner import FlorenceCaptioner
 
 
 def _png_bytes(w: int = 50, h: int = 30) -> bytes:

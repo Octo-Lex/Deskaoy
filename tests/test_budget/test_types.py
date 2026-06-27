@@ -2,22 +2,21 @@
 
 import time
 
+import pytest
+
 from deskaoy.budget.types import (
     AlertLevel,
     BudgetAlert,
     BudgetBlock,
     BudgetConfig,
     BudgetScope,
-    BudgetState,
     CascadeConfig,
     CascadeResult,
     CascadeTier,
-    CircuitState,
     CompressionResult,
     CompressionStrategy,
     CostTier,
     CredentialEntry,
-    CredentialRotated,
     ModelPricing,
     SelectionStrategy,
     TokenUsageRecord,
@@ -117,7 +116,7 @@ class TestFrozenTypes:
         cfg = BudgetConfig()
         try:
             cfg.daily_cap_usd = 999  # type: ignore
-            assert False, "should raise"
+            pytest.fail(), "should raise"
         except AttributeError:
             pass
 
@@ -125,7 +124,7 @@ class TestFrozenTypes:
         mp = ModelPricing(model="m", provider="p", input_cost_per_1m=1.0, output_cost_per_1m=2.0, context_window=200_000)
         try:
             mp.model = "x"  # type: ignore
-            assert False, "should raise"
+            pytest.fail(), "should raise"
         except AttributeError:
             pass
 
@@ -133,7 +132,7 @@ class TestFrozenTypes:
         ct = CascadeTier(tier=CostTier.TIER_1, model="m", provider="p", cost_multiplier=1.0)
         try:
             ct.model = "x"  # type: ignore
-            assert False, "should raise"
+            pytest.fail(), "should raise"
         except AttributeError:
             pass
 
@@ -141,7 +140,7 @@ class TestFrozenTypes:
         cc = CascadeConfig()
         try:
             cc.default_tier = CostTier.TIER_2  # type: ignore
-            assert False, "should raise"
+            pytest.fail(), "should raise"
         except AttributeError:
             pass
 

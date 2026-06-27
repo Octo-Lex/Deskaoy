@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from deskaoy.vision.factory import VisionProviderFactory
 
 
@@ -70,22 +68,21 @@ class TestGroundingWiring:
 
     def test_pipeline_initialization_failure_handled(self):
         """If GroundingPipeline init fails, factory still works."""
-        with patch.dict(os.environ, {"SB_VISION_DEFAULT_PROVIDER": "grounding"}):
+        with patch.dict(os.environ, {"SB_VISION_DEFAULT_PROVIDER": "grounding"}), patch(
+            "deskaoy.vision.factory.GroundingPipeline",
+            side_effect=RuntimeError("no weights"),
+            create=True,
+        ):
+            # The actual import happens inside from_env, so we need to
+            # patch the module-level import. Since GroundingPipeline is
+            # imported inside from_env, we patch the pipeline module.
             with patch(
-                "deskaoy.vision.factory.GroundingPipeline",
+                "deskaoy.grounding.pipeline.GroundingPipeline",
                 side_effect=RuntimeError("no weights"),
-                create=True,
             ):
-                # The actual import happens inside from_env, so we need to
-                # patch the module-level import. Since GroundingPipeline is
-                # imported inside from_env, we patch the pipeline module.
-                with patch(
-                    "deskaoy.grounding.pipeline.GroundingPipeline",
-                    side_effect=RuntimeError("no weights"),
-                ):
-                    factory = VisionProviderFactory.from_env()
-                    # Should still create factory, just without grounding
-                    assert isinstance(factory, VisionProviderFactory)
+                factory = VisionProviderFactory.from_env()
+                # Should still create factory, just without grounding
+                assert isinstance(factory, VisionProviderFactory)
 
     def test_coexists_with_cloud_providers(self):
         """Grounding can coexist with Anthropic/OpenAI providers."""

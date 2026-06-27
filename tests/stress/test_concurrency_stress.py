@@ -5,32 +5,22 @@ Hits concurrent-sensitive components with 50-500 parallel operations.
 
 Layer 2 of the stress testing strategy.
 """
-import pytest
 import asyncio
-import time
-import os
 import tempfile
 from pathlib import Path
 
-
-# ── Imports ──────────────────────────────────────────────────────────────
-
-from deskaoy.safety.capture_gate import CaptureGate
-from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
-from deskaoy.safety.cost_tracker import CostTracker
-from deskaoy.safety.timeout_guard import TimeoutGuard
+import pytest
 
 from deskaoy.cascade.cache import TierPreferenceCache
 from deskaoy.cascade.types import Tier
-
-from deskaoy.memory.facts import FactStore, Fact
-
-from deskaoy.recovery.retry_tracker import RetryTracker
-
+from deskaoy.memory.facts import Fact, FactStore
 from deskaoy.orchestration.blackboard import Blackboard
-
 from deskaoy.performance import LatencyProfiler
 
+# ── Imports ──────────────────────────────────────────────────────────────
+from deskaoy.safety.capture_gate import CaptureGate
+from deskaoy.safety.cost_tracker import CostTracker
+from deskaoy.safety.rate_governor import ActionRateGovernor, RateLimit
 
 # ══════════════════════════════════════════════════════════════════════════
 # 1. CAPTURE GATE — concurrent acquire/release
@@ -99,7 +89,7 @@ class TestRateGovernorConcurrency:
         gov = ActionRateGovernor(limits={"click": RateLimit(max_actions=100, window_seconds=1.0, cooldown_seconds=0.01)})
         successes = 0
 
-        for i in range(200):
+        for _i in range(200):
             gov.record("click")
             if gov.check("click"):
                 successes += 1
@@ -114,7 +104,7 @@ class TestRateGovernorConcurrency:
             "type": RateLimit(max_actions=50, window_seconds=1.0, cooldown_seconds=0.01),
         })
 
-        for i in range(100):
+        for _i in range(100):
             gov.record("click")
             gov.record("type")
 

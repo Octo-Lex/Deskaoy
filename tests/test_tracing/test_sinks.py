@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-from pathlib import Path
 
 import pytest
 
@@ -14,7 +13,7 @@ from deskaoy.tracing.sinks import (
     SQLiteSink,
     TraceSink,
 )
-from deskaoy.tracing.types import SpanKind, SpanStatus, TraceEvent
+from deskaoy.tracing.types import SpanKind, TraceEvent
 
 
 def _make_event(**kwargs) -> TraceEvent:

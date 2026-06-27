@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
-import pytest
 
 from deskaoy.services.dialog_service import (
-    DialogService,
-    DialogButton,
-    IDOK,
-    IDCANCEL,
-    IDYES,
-    IDNO,
-    DIALOG_CLASS,
     BUTTON_NAME_TO_ID,
+    DIALOG_CLASS,
+    IDCANCEL,
+    IDNO,
+    IDOK,
+    IDYES,
+    DialogButton,
+    DialogService,
 )
 
 

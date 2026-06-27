@@ -8,9 +8,7 @@ import pytest
 from deskaoy.safety.capture_gate import (
     CaptureGate,
     CaptureMetrics,
-    CaptureQueueFullError,
 )
-
 
 # ── Construction ──────────────────────────────────────────────────────
 

@@ -7,22 +7,17 @@ that unit tests might miss.
 Run: pytest tests/smoke/ -v
 """
 
-import asyncio
-import time
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from deskaoy.desktop_agent import DesktopAgent
 from deskaoy.os_types import (
     AgentContext,
     AgentGoal,
-    CancellationToken,
-    Confidence,
-    ResultStatus,
     RestoreMethod,
+    ResultStatus,
     Snapshot,
 )
-from deskaoy.desktop_agent import DesktopAgent
 from deskaoy.results.types import ActionResult, ResultMeta
 
 

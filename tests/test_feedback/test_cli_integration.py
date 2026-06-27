@@ -10,14 +10,12 @@ Tests:
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from deskaoy.cascade.protocol import SurfaceAdapter
 from deskaoy.feedback.engine import FeedbackEngine
-
 
 # ---------------------------------------------------------------------------
 # 1. CLI flag parsing
@@ -139,7 +137,7 @@ class TestWindowsAdapterFeedback:
                     with patch.object(engine, 'on_after_click') as mock_after:
                         # Need to handle asyncio.sleep for settle delay
                         with patch('asyncio.sleep', new_callable=AsyncMock):
-                            result = await adapter.click("name:Test")
+                            await adapter.click("name:Test")
 
                             mock_before.assert_called_once_with(100, 200)
                             mock_after.assert_called_once_with(100, 200)

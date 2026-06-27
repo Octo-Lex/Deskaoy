@@ -1,11 +1,9 @@
 """Tests for pre-flight instruction validation (LangExtract pattern B)."""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from deskaoy.validation import (
     KNOWN_ACTIONS,
-    REQUIRED_PARAMS,
     ValidationIssue,
     ValidationIssueKind,
     ValidationLevel,
@@ -13,7 +11,6 @@ from deskaoy.validation import (
     extract_actions,
     validate_instruction,
 )
-
 
 # ---------------------------------------------------------------------------
 # extract_actions

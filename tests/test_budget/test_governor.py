@@ -1,9 +1,7 @@
 """Tests for TokenBudgetGovernor."""
 
-import json
-import time
 import threading
-from pathlib import Path
+import time
 
 from deskaoy.budget.governor import TokenBudgetGovernor
 from deskaoy.budget.types import (

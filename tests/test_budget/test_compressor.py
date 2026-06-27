@@ -119,7 +119,7 @@ class TestCompress:
             messages = [
                 {"role": "system", "content": "system prompt"},
             ]
-            for i in range(20):
+            for _i in range(20):
                 messages.append({"role": "user", "content": "x" * 2000})
                 messages.append({"role": "assistant", "content": "y" * 2000})
             result_msgs, result = await comp.compress(messages, context_window=10_000)

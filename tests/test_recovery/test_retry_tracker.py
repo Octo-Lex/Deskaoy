@@ -2,7 +2,6 @@
 
 from deskaoy.recovery.classifier import ErrorClassifier
 from deskaoy.recovery.retry_tracker import RetryTracker
-from deskaoy.recovery.types import RecoveryStrategy
 
 
 def _make_classified_error(error_type_str: str = "timeout"):

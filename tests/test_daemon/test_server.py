@@ -6,48 +6,34 @@ Tests TEST-37-01-01 through TEST-37-01-15.
 from __future__ import annotations
 
 import asyncio
-import dataclasses
 import json
 import os
 import sys
 import time
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from deskaoy.daemon.config import DaemonConfig, _default_socket_path
 from deskaoy.daemon.protocol import (
-    VALID_METHODS,
-    build_execute_request,
-    build_ping_request,
-    build_shutdown_request,
-    build_status_request,
-    decode_goal_from_params,
-    decode_result_from_response,
-    encode_request,
-    encode_response,
-    goal_to_params,
-    parse_request,
-    json_dumps,
-    json_loads_line,
-    _error_response,
     INVALID_REQUEST,
     METHOD_NOT_FOUND,
     PARSE_ERROR,
+    build_execute_request,
+    decode_goal_from_params,
+    decode_result_from_response,
+    encode_request,
+    goal_to_params,
+    json_dumps,
+    parse_request,
 )
 from deskaoy.os_types import (
     AgentContext,
     AgentGoal,
     AgentResult,
-    CancellationToken,
     Confidence,
-    Issue,
-    IssueSeverity,
     ResultStatus,
-    ErrorCode,
 )
-
 
 # ---------------------------------------------------------------------------
 # TEST-37-01-01: DaemonConfig has correct defaults

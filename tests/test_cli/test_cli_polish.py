@@ -5,14 +5,11 @@ error suggestions, and help text improvements.
 """
 from __future__ import annotations
 
-import logging
-import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
-from deskaoy.cli.main import main, _build_parser, _suggest_command
-
+from deskaoy.cli.main import _build_parser, _suggest_command, main
 
 # ------------------------------------------------------------------
 # T30-11: --verbose / -v flag enables DEBUG logging

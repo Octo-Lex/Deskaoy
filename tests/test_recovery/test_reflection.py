@@ -1,7 +1,6 @@
 """Tests for ReflectionAgent and CheckpointManager stub."""
 
 import asyncio
-from unittest.mock import AsyncMock
 
 from deskaoy.recovery.reflection import ReflectionAgent
 from deskaoy.recovery.types import TrajectoryState

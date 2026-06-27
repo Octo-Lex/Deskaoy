@@ -10,12 +10,12 @@ Requires:
 Run on the VM:
   DISPLAY=:99 pytest tests/stress/test_linux_atspi_stress.py --run-stress -v
 """
-import pytest
 import asyncio
 import os
-import time
 import sys
+import time
 
+import pytest
 
 # ── Skip if not on Linux with AT-SPI ────────────────────────────────────
 
@@ -37,7 +37,6 @@ pytestmark.append(
 
 
 from deskaoy.adapters.linux import LinuxAdapter
-
 
 # ══════════════════════════════════════════════════════════════════════════
 # Fixtures
@@ -82,7 +81,7 @@ class TestSnapshotStress:
     async def test_50_rapid_snapshots(self, adapter):
         """50 snapshots in quick succession must not crash."""
         results = []
-        for i in range(50):
+        for _i in range(50):
             snap = await adapter.snapshot()
             results.append(snap is not None)
 
@@ -91,7 +90,7 @@ class TestSnapshotStress:
 
     async def test_snapshot_after_app_toggle(self, adapter):
         """Snapshot must work before and after app toggle."""
-        snap1 = await adapter.snapshot()
+        await adapter.snapshot()
 
         _ensure_calculator()
         time.sleep(1)
@@ -219,7 +218,7 @@ class TestTitleStateStress:
         """100 evaluate calls must not crash."""
         for i in range(100):
             try:
-                result = await adapter.evaluate(f"1 + {i}")
+                await adapter.evaluate(f"1 + {i}")
             except NotImplementedError:
                 pytest.skip("evaluate not implemented on Linux")
             except Exception:

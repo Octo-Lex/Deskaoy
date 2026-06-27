@@ -1,16 +1,16 @@
 """Tests for CLI REPL (T01-28 through T01-31)."""
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+from deskaoy.cli.repl import run_repl
 from deskaoy.os_types import (
     AgentResult,
-    ResultStatus,
     Confidence,
+    ResultStatus,
 )
-from deskaoy.cli.repl import run_repl
-
 
 # ---------------------------------------------------------------------------
 # Mock agent
@@ -59,7 +59,7 @@ class TestReplHelp:
         agent = _mock_agent()
         with patch("deskaoy.cli.repl._get_agent", return_value=agent):
             with patch("builtins.input", side_effect=[".help", ".exit"]):
-                code = await run_repl(session_id="test-session")
+                await run_repl(session_id="test-session")
 
         out = capsys.readouterr().out
         assert ".help" in out
@@ -96,7 +96,7 @@ class TestReplInstruction:
         agent = _mock_agent()
         with patch("deskaoy.cli.repl._get_agent", return_value=agent):
             with patch("builtins.input", side_effect=["click OK button", ".exit"]):
-                code = await run_repl(session_id="test-session")
+                await run_repl(session_id="test-session")
 
         agent.execute.assert_called_once()
         out = capsys.readouterr().out

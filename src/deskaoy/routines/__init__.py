@@ -14,9 +14,8 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
@@ -237,7 +236,7 @@ def _validate_cron_interval(resolved: str) -> None:
     try:
         fields = _parse_cron(resolved)
     except ValueError:
-        raise ValueError(f"Invalid cron expression: {resolved!r}")
+        raise ValueError(f"Invalid cron expression: {resolved!r}") from None
 
     # Compute first and second fires from a fixed reference point
     ref = datetime(2025, 1, 1, 0, 0, tzinfo=UTC)

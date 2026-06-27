@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from deskaoy.grounding.types import DetectionSource, ElementRole
 from deskaoy.grounding.paddle_ocr import PaddleOCREngine
+from deskaoy.grounding.types import DetectionSource, ElementRole
 
 
 def _png_bytes(w: int = 200, h: int = 200) -> bytes:

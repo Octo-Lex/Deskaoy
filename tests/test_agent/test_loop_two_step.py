@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import asyncio
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 from deskaoy.agent.loop import AgentLoop
 from deskaoy.agent.registry import ToolRegistry
-from deskaoy.agent.types import StepResult, LoopResult
+from deskaoy.agent.types import StepResult
 from deskaoy.results.types import ActionResult
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -104,7 +102,7 @@ class TestAgentLoopTwoStep:
             two_step=True,
         )
 
-        from deskaoy.agent.types import PlanItem, PlanStatus
+        from deskaoy.agent.types import PlanItem
         plan = [PlanItem(index=0, description="Click button")]
 
         # Create a step with diff_summary

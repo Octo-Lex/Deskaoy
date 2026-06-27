@@ -101,7 +101,7 @@ class MacOSAdapter(SurfaceAdapter):
                 "macOS adapter requires pyobjc. "
                 "Install with: pip install pyobjc-framework-ApplicationServices "
                 "pyobjc-framework-Quartz"
-            )
+            ) from None
 
     # =================================================================
     # AXUIElement Management

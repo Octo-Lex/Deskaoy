@@ -2,23 +2,15 @@
 
 from __future__ import annotations
 
-import asyncio
-import json
-import tempfile
-from pathlib import Path
-
 import pytest
 
 from deskaoy.cascade.types import AXNode, AXSnapshot
 from deskaoy.memory.store import ActionMemory, MemoryConfig, _safe_filename
 from deskaoy.memory.types import (
     ActionEvidence,
-    AnchorKind,
-    DurableTarget,
     TierRecord,
     compute_target_id,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -104,7 +96,7 @@ class TestRecord:
 
     @pytest.mark.asyncio
     async def test_tier_history_capped(self, memory):
-        for i in range(60):
+        for _i in range(60):
             evidence = _evidence(
                 tier_attempts=[TierRecord("selector", "success", 10.0, "selector")]
             )

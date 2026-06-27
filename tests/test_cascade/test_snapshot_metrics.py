@@ -1,13 +1,11 @@
 """Tests for SnapshotStore metrics (BATCH-31)."""
 from __future__ import annotations
 
-import asyncio
-import json
 from pathlib import Path
 
 import pytest
 
-from deskaoy.cascade.snapshot_store import SnapshotStore, SnapshotMetrics
+from deskaoy.cascade.snapshot_store import SnapshotMetrics, SnapshotStore
 
 
 @pytest.fixture

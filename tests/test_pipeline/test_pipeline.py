@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import pytest
 
 from deskaoy.cascade.protocol import SurfaceAdapter
-from deskaoy.results.types import ActionResult, action_result
-from deskaoy.pipeline.executor import PipelineExecutor, _resolve_templates, PipelineState
+from deskaoy.pipeline.executor import PipelineExecutor, PipelineState, _resolve_templates
 from deskaoy.pipeline.registry import PipelineRegistry
-from deskaoy.pipeline.types import PipelineArg, PipelineDefinition, PipelineStep
-
+from deskaoy.pipeline.types import PipelineDefinition, PipelineStep
+from deskaoy.results.types import action_result
 
 # ---------------------------------------------------------------------------
 # Mock adapter

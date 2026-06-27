@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import pytest
-
+from deskaoy.grounding.fusion import FusionEngine
 from deskaoy.grounding.types import (
     BBox,
     Detection,
     DetectionSource,
     ElementRole,
-    FusedElement,
 )
-from deskaoy.grounding.fusion import FusionEngine
-
 
 # ---------------------------------------------------------------------------
 # Helpers

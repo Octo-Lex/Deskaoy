@@ -20,24 +20,15 @@ import pytest
 from deskaoy.os_types import (
     AgentContext,
     AgentGoal,
-    AgentResult,
-    CancellationToken,
-    Confidence,
     ErrorCode,
-    IssueSeverity,
     ResultStatus,
 )
 from deskaoy.policy import PolicyBridge, PolicyEffect
 from deskaoy.recovery_bridge import (
     CircuitBreaker,
     RecoveryBridge,
-    RecoveryEvent,
-    RecoveryEventType,
     RetryPolicy,
 )
-from deskaoy.results.types import ActionError, ActionResult, ErrorCategory
-from deskaoy.trace_bridge import TraceBridge
-
 
 # =====================================================================
 # Fixtures
@@ -320,7 +311,7 @@ class TestCapabilitySchema:
         assert schema["schema_version"] == 1
 
     def test_commands_listed(self) -> None:
-        from deskaoy.desktop_agent import DesktopAgent, CAPABILITIES
+        from deskaoy.desktop_agent import CAPABILITIES, DesktopAgent
         schema = DesktopAgent().schema()
         capabilities = schema["capabilities"]
         assert len(capabilities) == len(CAPABILITIES)

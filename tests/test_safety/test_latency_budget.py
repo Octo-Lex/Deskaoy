@@ -1,6 +1,6 @@
 """Tests for LatencyBudget — per-action latency budget tracking."""
 
-from deskaoy.safety.latency_budget import LatencyBudget, LatencyMeasurement, ACTION_BUDGETS
+from deskaoy.safety.latency_budget import ACTION_BUDGETS, LatencyBudget, LatencyMeasurement
 
 
 class TestLatencyMeasurement:

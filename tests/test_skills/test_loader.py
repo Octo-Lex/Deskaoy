@@ -8,17 +8,14 @@ from pathlib import Path
 import pytest
 
 from deskaoy.skills.loader import (
-    SkillDefinition,
     SkillLoader,
-    SkillTrigger,
-    load_skill,
+    _extract_list_section,
+    _extract_section,
+    _parse_allowed_tools,
     _parse_frontmatter,
     _parse_triggers,
-    _parse_allowed_tools,
-    _extract_section,
-    _extract_list_section,
+    load_skill,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Unit: frontmatter parsing

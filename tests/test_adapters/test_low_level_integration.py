@@ -7,7 +7,6 @@ import sys
 import time
 
 import pytest
-from unittest.mock import MagicMock
 
 pytestmark_integration = [
     pytest.mark.integration,
@@ -40,8 +39,8 @@ class TestToolRegistryWiring:
 @pytest.fixture()
 def notepad_for_lowlevel():
     """Launch Notepad for low-level input testing."""
-    import win32gui
     import win32con
+    import win32gui
 
     proc = subprocess.Popen(["notepad.exe"])
     time.sleep(2.0)

@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-from pathlib import Path
 
 from deskaoy.tracing.flow_logger import FlowLogger, _current_context
 from deskaoy.tracing.types import SpanKind, SpanStatus
@@ -51,9 +50,8 @@ class TestSpanScope:
                 async def close(self): pass
 
             logger = FlowLogger(sinks=[Collector()])
-            async with logger.trace("s1"):
-                async with logger.span(SpanKind.ACTION, "click"):
-                    pass
+            async with logger.trace("s1"), logger.span(SpanKind.ACTION, "click"):
+                pass
             actions = [e for e in collected if e.span_kind == SpanKind.ACTION]
             assert len(actions) == 1
             assert actions[0].name == "click"
@@ -93,10 +91,9 @@ class TestSpanScope:
                 async def close(self): pass
 
             logger = FlowLogger(sinks=[Collector()])
-            async with logger.trace("s1"):
-                async with logger.span(SpanKind.ACTION, "outer"):
-                    async with logger.span(SpanKind.CDP, "inner"):
-                        pass
+            async with logger.trace("s1"), logger.span(SpanKind.ACTION, "outer"):
+                async with logger.span(SpanKind.CDP, "inner"):
+                    pass
             action_events = [e for e in collected if e.span_kind in (SpanKind.ACTION, SpanKind.CDP)]
             assert len(action_events) == 2
         asyncio.run(_test())
@@ -112,9 +109,8 @@ class TestSpanScope:
                 async def close(self): pass
 
             logger = FlowLogger(sinks=[Collector()])
-            async with logger.trace("s1"):
-                async with logger.span(SpanKind.ACTION, "click"):
-                    await asyncio.sleep(0.01)
+            async with logger.trace("s1"), logger.span(SpanKind.ACTION, "click"):
+                await asyncio.sleep(0.01)
             event = [e for e in collected if e.name == "click"][0]
             assert event.duration_ms > 0
         asyncio.run(_test())
@@ -206,7 +202,7 @@ class TestRedaction:
             async with logger.trace("s1"):
                 await logger.emit_event(SpanKind.PAGE, "nav",
                                         attributes={"url": "https://example.com/page?q=hello"})
-            events = await logger.query_events(_current_context.get().trace_id if _current_context.get() else "s1", span_kind=SpanKind.PAGE)
+            await logger.query_events(_current_context.get().trace_id if _current_context.get() else "s1", span_kind=SpanKind.PAGE)
         asyncio.run(_test())
 
     def test_non_url_unchanged(self):
@@ -324,10 +320,9 @@ class TestResolveReentry:
         async def _test():
             logger = FlowLogger()
             stored = None
-            current = None
             async with logger.trace("s1") as ctx:
                 stored = ctx
-                current = _current_context.get()
+                _current_context.get()
             result = FlowLogger.resolve_reentry_context(stored)
             assert result.trace_id == stored.trace_id
         asyncio.run(_test())
@@ -350,7 +345,7 @@ class TestM19SilentDrop:
         """M19: Dropped events should be counted and accessible."""
         async def _test():
             logger = FlowLogger(max_events_per_trace=3)
-            async with logger.trace("s1") as ctx:
+            async with logger.trace("s1"):
                 for i in range(5):
                     await logger.emit_event(SpanKind.CUSTOM, f"event-{i}")
             # trace emits session.start + session.end, so 7 total events with cap=3 → 4 dropped
@@ -361,7 +356,7 @@ class TestM19SilentDrop:
         """M19: No drops when under cap."""
         async def _test():
             logger = FlowLogger(max_events_per_trace=100)
-            async with logger.trace("s1") as ctx:
+            async with logger.trace("s1"):
                 await logger.emit_event(SpanKind.CUSTOM, "event")
             assert logger.dropped_event_count == 0
         asyncio.run(_test())
@@ -379,6 +374,7 @@ class TestFileSinkAsyncFlush:
 
     def test_file_sink_flush_uses_thread(self, tmp_path):
         import inspect
+
         from deskaoy.tracing.sinks import FileSink
         source = inspect.getsource(FileSink.flush)
         assert "to_thread" in source, "FileSink.flush should use asyncio.to_thread"
@@ -386,7 +382,7 @@ class TestFileSinkAsyncFlush:
     def test_file_sink_buffer_accumulates(self, tmp_path):
         async def _test():
             from deskaoy.tracing.sinks import FileSink
-            from deskaoy.tracing.types import TraceEvent, SpanKind
+            from deskaoy.tracing.types import SpanKind, TraceEvent
             sink = FileSink(tmp_path / "trace.jsonl", buffer_size=5)
             event = TraceEvent(
                 trace_id="t1", step_id=0, span_id="s0",
@@ -406,6 +402,7 @@ class TestSQLiteSinkAsyncFlush:
 
     def test_sqlite_sink_flush_uses_thread(self):
         import inspect
+
         from deskaoy.tracing.sinks import SQLiteSink
         source = inspect.getsource(SQLiteSink.flush)
         assert "to_thread" in source, "SQLiteSink.flush should use asyncio.to_thread"
@@ -413,8 +410,9 @@ class TestSQLiteSinkAsyncFlush:
     def test_sqlite_sink_buffer_accumulates(self):
         async def _test():
             from unittest.mock import MagicMock
+
             from deskaoy.tracing.sinks import SQLiteSink
-            from deskaoy.tracing.types import TraceEvent, SpanKind
+            from deskaoy.tracing.types import SpanKind, TraceEvent
             db = MagicMock()
             sink = SQLiteSink(db)
             event = TraceEvent(

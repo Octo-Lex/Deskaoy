@@ -8,14 +8,11 @@ Verifies:
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from deskaoy.cascade.protocol import SurfaceAdapter
-from deskaoy.cascade.types import AXSnapshot
-
 
 # ---------------------------------------------------------------------------
 # TASK-03 Tests: Version Bump + Integration (9 tests)

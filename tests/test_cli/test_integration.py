@@ -1,26 +1,14 @@
 """Integration tests for CLI full-stack dispatch (T02-01 through T02-08)."""
 from __future__ import annotations
 
-import asyncio
 import sys
-import pytest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from deskaoy.os_types import (
-    AgentResult,
-    AgentEstimate,
-    ResultStatus,
-    Confidence,
-    AgentGoal,
-    AgentContext,
-    CancellationToken,
-)
-from deskaoy.desktop_agent import DesktopAgent
-from deskaoy.routines import Routine, RoutineScheduler
-from deskaoy.memory.facts import Fact, FactStore
-from deskaoy.cli.main import main
+import pytest
 
+from deskaoy.cli.main import main
+from deskaoy.desktop_agent import DesktopAgent
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -71,7 +59,7 @@ class TestCLIStack:
     def test_execute_returns_success(self, capsys):
         agent = _full_mock_agent()
         with patch("deskaoy.cli.main._get_agent", return_value=agent):
-            code = main(["execute", "click OK"])
+            main(["execute", "click OK"])
         # May return 0 or 1 depending on validation state
         # The important thing is the dispatch chain works
         out = capsys.readouterr().out

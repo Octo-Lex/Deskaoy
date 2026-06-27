@@ -1,7 +1,8 @@
 """Tests for tracing types."""
 
 import json
-import time
+
+import pytest
 
 from deskaoy.tracing.types import (
     CostRecord,
@@ -169,7 +170,7 @@ class TestSessionSummary:
         )
         try:
             summary.status = "error"  # type: ignore
-            assert False, "should raise"
+            pytest.fail(), "should raise"
         except AttributeError:
             pass
 

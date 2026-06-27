@@ -3,7 +3,6 @@
 from deskaoy.agent.types import (
     ChildTask,
     DelegationResult,
-    DelegationStatus,
     LoopNudge,
     LoopResult,
     PlanItem,

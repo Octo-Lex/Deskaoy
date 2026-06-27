@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
-
 from deskaoy.results.types import (
     ActionError,
     ErrorCategory,
     make_error,
 )
-
 
 # ---------------------------------------------------------------------------
 # ActionError — new fields

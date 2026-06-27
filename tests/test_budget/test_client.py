@@ -1,7 +1,9 @@
 """Tests for BudgetAwareLLMClient."""
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
+
+import pytest
 
 from deskaoy.budget.cascade import ModelCascade
 from deskaoy.budget.client import (
@@ -12,7 +14,7 @@ from deskaoy.budget.client import (
 from deskaoy.budget.compressor import ContextCompressor
 from deskaoy.budget.credential_pool import CircuitBreaker, CredentialPool
 from deskaoy.budget.governor import TokenBudgetGovernor
-from deskaoy.budget.types import BudgetConfig, CostTier, TokenUsageRecord
+from deskaoy.budget.types import BudgetConfig, CostTier
 
 
 def _make_client(*, daily_cap=100.0, llm_client=None):
@@ -80,7 +82,7 @@ class TestBudgetAwareLLMClient:
             client = _make_client(daily_cap=0.001)
             try:
                 await client.call([{"role": "user", "content": "test"}])
-                assert False, "should raise"
+                pytest.fail("should raise")
             except BudgetExhaustedError as e:
                 assert e.block is not None
         asyncio.run(_test())
@@ -92,7 +94,7 @@ class TestBudgetAwareLLMClient:
                 client._circuit_breaker.record_failure("anthropic")
             try:
                 await client.call([{"role": "user", "content": "test"}])
-                assert False, "should raise"
+                pytest.fail("should raise")
             except AllProvidersCircuitOpenError:
                 pass
         asyncio.run(_test())

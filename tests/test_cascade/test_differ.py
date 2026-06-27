@@ -3,9 +3,8 @@ from __future__ import annotations
 
 import pytest
 
-from deskaoy.cascade.differ import SnapshotDiffer, SnapshotDiff, NodeDiff
+from deskaoy.cascade.differ import NodeDiff, SnapshotDiff, SnapshotDiffer
 from deskaoy.cascade.types import AXNode, AXSnapshot
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -1,22 +1,20 @@
 """Tests for B38 Runtime Execution Hardening — Types (T03-01 through T03-08, T03-18 through T03-27, T03-33 through T03-40)."""
 from __future__ import annotations
 
-import time
 import pytest
 
 from deskaoy.runtime.types import (
-    RuntimeAttemptState,
-    RuntimeAttempt,
-    PolicyObligation,
+    WINDOWS_CAPABILITIES,
     AdapterCapabilities,
-    RuntimeResourceBudget,
-    RuntimeExecutionReceipt,
+    PolicyObligation,
     PreflightCheck,
     PreflightResult,
-    WINDOWS_CAPABILITIES,
+    RuntimeAttempt,
+    RuntimeAttemptState,
+    RuntimeExecutionReceipt,
+    RuntimeResourceBudget,
     make_truth_message,
 )
-
 
 # ---------------------------------------------------------------------------
 # T03-01: RuntimeAttemptState transitions forward only

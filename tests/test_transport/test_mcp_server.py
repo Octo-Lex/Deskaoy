@@ -1,8 +1,6 @@
 """Tests for MCP transport (BATCH-05 TASK-04)."""
 from __future__ import annotations
 
-import asyncio
-import json
 import pytest
 
 from deskaoy.transport.mcp_server import MCPServer, _build_tools

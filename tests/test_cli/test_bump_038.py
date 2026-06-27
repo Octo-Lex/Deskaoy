@@ -1,15 +1,8 @@
 """Tests for BATCH-30 TASK-03 — version bump and integration checks."""
 from __future__ import annotations
 
-import argparse
-from unittest.mock import patch, MagicMock
-
-import pytest
-
+from deskaoy.cli.main import main
 from deskaoy.cli.version import VERSION
-from deskaoy.cli.main import main, _build_parser
-from deskaoy.cli.completions import CompletionGenerator
-
 
 # ------------------------------------------------------------------
 # T30-16: Version is 0.42.0

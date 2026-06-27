@@ -33,7 +33,7 @@ class SubagentDelegator:
         security_manager: Any | None = None,
         stealth_manager: Any | None = None,
     ) -> None:
-        self._session = browser_session
+        self._session = session
         self._registry = registry
         self._llm = llm_client
         self._max_concurrency = max_concurrency

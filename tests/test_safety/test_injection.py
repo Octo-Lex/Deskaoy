@@ -4,7 +4,6 @@ import pytest
 
 from deskaoy.safety.injection import (
     InjectionPattern,
-    InjectionVerdict,
     PromptInjectionDetector,
     RiskLevel,
 )

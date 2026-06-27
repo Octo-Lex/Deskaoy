@@ -1,6 +1,6 @@
 """Tests for CostTracker — LLM cost tracking with budget enforcement."""
 
-from deskaoy.safety.cost_tracker import CostTracker, CostEntry, PRICING
+from deskaoy.safety.cost_tracker import PRICING, CostEntry, CostTracker
 
 
 class TestCostEntry:

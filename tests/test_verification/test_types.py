@@ -1,15 +1,15 @@
+import pytest
+
 """Tests for verification types: enums, PerceptualHash, dataclasses."""
 
 from deskaoy.verification.types import (
     ActionVerifiability,
     AXDiffResult,
     PerceptualHash,
-    VerifierConfig,
     VerificationActionType,
     VerificationLevel,
     VerificationResult,
-    VerificationSnapshot,
-    VLMVerificationDetail,
+    VerifierConfig,
 )
 
 
@@ -63,7 +63,7 @@ class TestPerceptualHash:
         h = PerceptualHash(dhash=0, phash=0)
         try:
             h.dhash = 1
-            assert False, "Should be frozen"
+            pytest.fail("Should be frozen")
         except AttributeError:
             pass
 
@@ -90,7 +90,7 @@ class TestVerificationResult:
         )
         try:
             r.changed = False
-            assert False, "Should be frozen"
+            pytest.fail("Should be frozen")
         except AttributeError:
             pass
 
@@ -115,7 +115,7 @@ class TestVerifierConfig:
         c = VerifierConfig()
         try:
             c.hash_threshold = 5
-            assert False, "Should be frozen"
+            pytest.fail("Should be frozen")
         except AttributeError:
             pass
 

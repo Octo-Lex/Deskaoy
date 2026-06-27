@@ -3,9 +3,8 @@ from __future__ import annotations
 
 import pytest
 
-from deskaoy.agent.two_step import TwoStepVerifier, TwoStepResult
-from deskaoy.cascade.types import AXSnapshot, AXNode
-
+from deskaoy.agent.two_step import TwoStepResult, TwoStepVerifier
+from deskaoy.cascade.types import AXNode, AXSnapshot
 
 # ---------------------------------------------------------------------------
 # Helpers

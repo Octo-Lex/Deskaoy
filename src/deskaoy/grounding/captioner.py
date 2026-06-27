@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 _HAS_TRANSFORMERS = False
 try:
-    from transformers import AutoModelForCausalLM, AutoProcessor
+    from transformers import AutoModelForCausalLM, AutoProcessor  # noqa: F401
     _HAS_TRANSFORMERS = True
 except ImportError:
     pass
