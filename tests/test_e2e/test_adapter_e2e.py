@@ -274,8 +274,18 @@ class TestLinuxAdapterE2E:
 
     @pytest.mark.asyncio
     async def test_linux_full_lifecycle(self):
-        """E2E: Create adapter, snapshot, click, verify."""
+        """E2E: Create adapter, snapshot, click, type, verify."""
         adapter = _make_linux_adapter()
+
+        # Mock xdotool backend so tests are hermetic regardless of CI runner
+        from unittest.mock import MagicMock as _MagicMock
+        import subprocess as _subprocess
+        mock_cp = _MagicMock(spec=_subprocess.CompletedProcess)
+        mock_cp.returncode = 0
+        mock_cp.stdout = ""
+        mock_cp.stderr = ""
+        adapter._run_xdotool = _MagicMock(return_value=mock_cp)
+        adapter._input_backend_status = lambda: ("xdotool", True, "")
 
         # 1. Verify adapter is a SurfaceAdapter
         assert isinstance(adapter, SurfaceAdapter)
@@ -289,23 +299,46 @@ class TestLinuxAdapterE2E:
         click_result = await adapter.click("300,200")
         assert click_result.ok is True
 
-        # 4. Type text — unsupported on Linux
+        # 4. Type text — supported with xdotool backend
         type_result = await adapter.type_text("hello")
-        assert type_result.ok is False
+        assert type_result.ok is True
 
         # 5. Verify URL
         assert adapter.current_url() == "x11://desktop"
 
     @pytest.mark.asyncio
     async def test_linux_fill_lifecycle(self):
-        """E2E: Fill is unsupported on Linux."""
+        """E2E: Fill with xdotool backend."""
         adapter = _make_linux_adapter()
-        result = await adapter.fill("button_name", "test")
-        assert result.ok is False
+
+        from unittest.mock import MagicMock as _MagicMock
+        import subprocess as _subprocess
+        mock_cp = _MagicMock(spec=_subprocess.CompletedProcess)
+        mock_cp.returncode = 0
+        mock_cp.stdout = ""
+        mock_cp.stderr = ""
+        adapter._run_xdotool = _MagicMock(return_value=mock_cp)
+        adapter._input_backend_status = lambda: ("xdotool", True, "")
+
+        with patch.object(adapter, "_ensure_imports"), \
+             patch.object(adapter, "_find_accessible", return_value=None), \
+             patch.object(adapter, "_resolve_point_or_none", return_value=(100, 100)):
+            result = await adapter.fill("button_name", "test")
+        assert result.ok is True
 
     @pytest.mark.asyncio
     async def test_linux_key_press_lifecycle(self):
-        """E2E: Key press is unsupported on Linux."""
+        """E2E: Key press with xdotool backend."""
         adapter = _make_linux_adapter()
+
+        from unittest.mock import MagicMock as _MagicMock
+        import subprocess as _subprocess
+        mock_cp = _MagicMock(spec=_subprocess.CompletedProcess)
+        mock_cp.returncode = 0
+        mock_cp.stdout = ""
+        mock_cp.stderr = ""
+        adapter._run_xdotool = _MagicMock(return_value=mock_cp)
+        adapter._input_backend_status = lambda: ("xdotool", True, "")
+
         result = await adapter.key_press("enter")
-        assert result.ok is False
+        assert result.ok is True

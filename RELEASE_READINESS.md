@@ -44,15 +44,28 @@ Real-hardware integration tests (`test_real_*.py`,
 `test_desktop_agent_live.py`) remain gated behind `--run-integration` and
 are not run in CI.
 
-### 3. Linux input injection unsupported
+### 3. Linux input injection — X11 supported, Wayland unsupported
 
-`type_text`, `key_press`, `scroll`, and `fill` return
-`ErrorCategory.UNSUPPORTED` on Linux because no real input-injection
-backend (AT-SPI2 EditableText, xdotool) is wired. The methods fail honestly
-rather than returning fake success. `dry_run=True` still works for
-previewing.
+Real input injection is supported on **X11 sessions with xdotool** installed.
+The adapter detects `XDG_SESSION_TYPE`, `DISPLAY`, and `shutil.which("xdotool")`
+at call time. When available, `click`, `type_text`, `key_press`, `scroll`, and
+`fill` execute real xdotool commands. When unavailable (Wayland, no DISPLAY,
+no xdotool), they return `ErrorCategory.UNSUPPORTED`.
 
-**Fix path**: implement AT-SPI2 EditableText or xdotool injection.
+**Exception:** `click()` has a two-tier contract:
+- **AT-SPI2 action click** succeeds without xdotool when an accessible element
+  exposes an invoke/click action. This is a real accessibility action, not fake
+  success.
+- **Coordinate-based click** requires X11 + xdotool. Falls back to `UNSUPPORTED`
+  when xdotool is unavailable.
+
+`type_text`, `key_press`, `scroll`, and `fill` all require X11 + xdotool.
+
+Wayland remains unsupported — global input injection on Wayland is
+compositor/portal-dependent and cannot be done generically. AT-SPI2 portal
+backend remains future work.
+
+`dry_run=True` always works for previewing without subprocess invocation.
 
 ### 4. macOS adapter experimental
 

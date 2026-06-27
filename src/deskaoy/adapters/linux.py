@@ -2,7 +2,7 @@
 
 Implements SurfaceAdapter for Linux desktop applications using:
   - AT-SPI2 (python3-atspi): Accessibility tree (the "structural eyes")
-  - pyautogui / xdotool: Mouse/keyboard injection (the "hands")
+  - xdotool: Mouse/keyboard injection on X11 (the "hands")
   - PIL.ImageGrab / scrot: Screenshots (the "visual eyes")
 
 Lazy imports ensure this module never crashes on Windows/macOS — all
@@ -12,11 +12,19 @@ Safety guarantees:
   - All coordinates validated against accessible bounds where possible
   - Lazy imports: atspi only imported when actually used on Linux
   - Graceful fallback: clear error messages when deps missing
+
+Input injection backend:
+  - X11 + xdotool: real click, type_text, key_press, scroll, fill
+  - Wayland or missing xdotool: returns UNSUPPORTED (no fake success)
+  - dry_run always works without subprocess invocation
 """
 
 from __future__ import annotations
 
 import logging
+import os
+import shutil
+import subprocess
 from typing import Any
 
 from deskaoy.cascade.protocol import SurfaceAdapter
@@ -64,6 +72,25 @@ _ATSPI_ROLE_MAP: dict[int, str] = {
     30: "scrollbar",
     31: "page-tab-list",
 }
+
+
+def _redact_xdotool_args(args: list[str]) -> list[str]:
+    """Redact user-supplied data in xdotool args for safe logging.
+
+    After the ``--`` separator (which xdotool uses to delimit literal data),
+    all arguments are replaced with ``<redacted>`` to prevent leaking typed
+    text (passwords, tokens, private data) into debug logs.
+    """
+    redacted: list[str] = []
+    redact_rest = False
+    for arg in args:
+        if redact_rest:
+            redacted.append("<redacted>")
+            continue
+        redacted.append(arg)
+        if arg == "--":
+            redact_rest = True
+    return redacted
 
 
 class LinuxAdapter(SurfaceAdapter):
@@ -204,37 +231,120 @@ class LinuxAdapter(SurfaceAdapter):
             pass
 
     # ------------------------------------------------------------------
+    # Input backend detection
+    # ------------------------------------------------------------------
+
+    def _input_backend_status(self) -> tuple[str, bool, str]:
+        """Check whether a real input-injection backend is available.
+
+        Returns ``(backend_name, available, reason_if_unavailable)``.
+
+        Currently supports **xdotool on X11 only**. Wayland is unsupported
+        because global input injection is compositor/portal-dependent and
+        cannot be done generically without the user's explicit consent.
+        """
+        session_type = os.environ.get("XDG_SESSION_TYPE", "").lower()
+        if session_type == "wayland":
+            return ("xdotool", False, "Wayland session detected — xdotool cannot "
+                    "inject input on Wayland without compositor-specific portals")
+
+        if not os.environ.get("DISPLAY"):
+            return ("xdotool", False, "No DISPLAY environment variable — "
+                    "X11 session not detected")
+
+        if not shutil.which("xdotool"):
+            return ("xdotool", False, "xdotool binary not found — "
+                    "install with: sudo apt install xdotool")
+
+        return ("xdotool", True, "")
+
+    def _run_xdotool(self, args: list[str]) -> subprocess.CompletedProcess:
+        """Execute an xdotool command and return the completed process.
+
+        Raises ``FileNotFoundError`` if xdotool is not installed, and
+        ``subprocess.CalledProcessError`` if the command fails.
+
+        Debug logs redact any argument after ``--`` (the xdotool data
+        separator) to prevent leaking user-supplied text such as passwords,
+        tokens, or private data into logs.
+        """
+        safe_cmd = ["xdotool", *_redact_xdotool_args(args)]
+        logger.debug("xdotool: %s", " ".join(safe_cmd))
+        return subprocess.run(  # noqa: S603 — trusted binary, args are validated
+            ["xdotool"] + args,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+
+    # ------------------------------------------------------------------
     # Mouse actions
     # ------------------------------------------------------------------
 
     async def click(
         self, target: str, *, dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Click on a target element via AT-SPI2 action interface.
+        """Click on a target element via AT-SPI2 action or xdotool.
 
-        Falls back to coordinate-based clicking if AT-SPI2 action fails.
+        Priority:
+        1. **AT-SPI2 Action interface** — a real accessibility action
+           (e.g. ``Action.DoAction``). This succeeds without xdotool when
+           an accessible element exposes an invoke/click action. It is a
+           legitimate real action, not fake success.
+        2. **Coordinate-based click via xdotool** — when no AT-SPI action
+           is available, resolves the target to a point and runs
+           ``xdotool mousemove x y click 1``.
+
+        Returns ``UNSUPPORTED`` only for the coordinate fallback when no
+        X11 + xdotool backend is available. AT-SPI action clicks work
+        independently of xdotool availability.
         """
-        self._ensure_imports()
-
         if dry_run:
             return action_result(ok=True, data={
                 "action": "click", "target": target, "dry_run": True,
             })
 
+        # Try AT-SPI2 Action interface first (no input injection needed)
         try:
-            # Try AT-SPI2 Action interface
+            self._ensure_imports()
             acc = self._find_accessible(target)
             if acc is not None:
                 action_result_data = self._try_atspi_action(acc, "click")
                 if action_result_data is not None:
                     return action_result(ok=True, data=action_result_data)
+        except Exception:
+            pass  # Fall through to coordinate-based
 
-            # Fallback: coordinate-based click
-            point = self._resolve_point(target)
+        # Coordinate-based click via xdotool
+        backend, available, reason = self._input_backend_status()
+        if not available:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNSUPPORTED, reason),
+            )
+
+        try:
+            point = self._resolve_point_or_none(target)
+            if point is None:
+                return action_result(
+                    ok=False,
+                    error=ActionError(
+                        ErrorCategory.SELECTOR_NOT_FOUND,
+                        f"Could not resolve target to coordinates: {target!r}. "
+                        f"Use 'x,y' format for direct coordinates.",
+                    ),
+                )
+            self._run_xdotool(["mousemove", str(point[0]), str(point[1]), "click", "1"])
             return action_result(ok=True, data={
                 "x": point[0], "y": point[1],
-                "method": "coordinate",
+                "method": "xdotool",
             })
+        except subprocess.CalledProcessError as exc:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNKNOWN, f"xdotool click failed: {exc.stderr}"),
+            )
         except Exception as exc:
             return action_result(
                 ok=False,
@@ -244,15 +354,10 @@ class LinuxAdapter(SurfaceAdapter):
     async def fill(
         self, target: str, value: str, *, dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Fill a text field via AT-SPI2 Value/Text interface.
+        """Fill a text field by clicking it then typing the value.
 
-        .. warning::
-
-           The AT-SPI2 text injection path is **not yet wired** (it would
-           delegate to :meth:`type_text`, which is unsupported). Returns
-           ``ok=False`` with an ``UNSUPPORTED`` error **before performing
-           any side effects** — no click is executed. ``dry_run`` still
-           works for previewing.
+        Uses xdotool for real injection when available. Fails before any
+        side effect if the backend is unavailable.
         """
         if dry_run:
             return action_result(ok=True, data={
@@ -260,14 +365,31 @@ class LinuxAdapter(SurfaceAdapter):
                 "value": value, "dry_run": True,
             })
 
-        return action_result(
-            ok=False,
-            error=ActionError(
-                ErrorCategory.UNSUPPORTED,
-                "fill is not yet implemented for Linux — no safe text "
-                "injection backend is wired. Use dry_run=True to preview.",
-            ),
-        )
+        # Check backend BEFORE any click — no partial side effects
+        backend, available, reason = self._input_backend_status()
+        if not available:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNSUPPORTED, reason),
+            )
+
+        # Click the target
+        click_result = await self.click(target)
+        if not click_result.ok:
+            return click_result
+
+        # Type the value
+        try:
+            self._run_xdotool(["type", "--clearmodifiers", "--", value])
+            return action_result(ok=True, data={
+                "value": value,
+                "method": "xdotool",
+            })
+        except subprocess.CalledProcessError as exc:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNKNOWN, f"xdotool type failed: {exc.stderr}"),
+            )
 
     # ------------------------------------------------------------------
     # Keyboard actions
@@ -277,47 +399,49 @@ class LinuxAdapter(SurfaceAdapter):
         self, text: str, delay_ms: float = 0, *,
         dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Type text via AT-SPI2 editable text interface.
+        """Type text via xdotool.
 
-        .. warning::
-
-           The AT-SPI2 editable-text injection path is **not yet wired**.
-           Until a real injection backend (AT-SPI2 ``EditableText`` or
-           ``xdotool``) is implemented, this method returns ``ok=False``
-           with an ``UNSUPPORTED`` error rather than silently claiming
-           success. The ``dry_run`` path still works for previewing.
+        Requires an X11 session with xdotool installed. Returns
+        ``UNSUPPORTED`` on Wayland or when xdotool is missing.
         """
         if dry_run:
             return action_result(ok=True, data={
                 "action": "type_text", "char_count": len(text), "dry_run": True,
             })
 
-        return action_result(
-            ok=False,
-            error=ActionError(
-                ErrorCategory.UNSUPPORTED,
-                "type_text is not yet implemented for Linux — "
-                "no AT-SPI2 EditableText or xdotool injection backend is wired. "
-                "Use dry_run=True to preview.",
-            ),
-        )
+        backend, available, reason = self._input_backend_status()
+        if not available:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNSUPPORTED, reason),
+            )
+
+        try:
+            args = ["type", "--clearmodifiers"]
+            if delay_ms > 0:
+                args.extend(["--delay", str(int(delay_ms))])
+            args.extend(["--", text])
+            self._run_xdotool(args)
+            return action_result(ok=True, data={
+                "text": text,
+                "method": "xdotool",
+            })
+        except subprocess.CalledProcessError as exc:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNKNOWN, f"xdotool type failed: {exc.stderr}"),
+            )
 
     async def key_press(
         self, key: str, modifiers: int = 0, *,
         dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Press a key with optional modifiers.
+        """Press a key with optional modifiers via xdotool.
 
-        Checks key blocklist before executing.
-
-        .. warning::
-
-           The AT-SPI2 keyboard injection path is **not yet wired**.
-           Returns ``ok=False`` with an ``UNSUPPORTED`` error rather than
-           silently claiming success. The key blocklist is still checked,
-           and ``dry_run`` still works for previewing.
+        Enforces the key blocklist **before** any backend check. Returns
+        ``UNSUPPORTED`` if xdotool is not available.
         """
-        # SECURITY: Check key blocklist (pure Python, no AT-SPI2 needed)
+        # SECURITY: Check key blocklist (pure Python, no backend needed)
         from deskaoy.safety.key_blocklist import block_reason, is_blocked_key
         combo = key
         mod_names: list[str] = []
@@ -346,43 +470,90 @@ class LinuxAdapter(SurfaceAdapter):
                 "modifiers": modifiers, "dry_run": True,
             })
 
-        return action_result(
-            ok=False,
-            error=ActionError(
-                ErrorCategory.UNSUPPORTED,
-                "key_press is not yet implemented for Linux — "
-                "no AT-SPI2 keyboard or xdotool injection backend is wired. "
-                "Use dry_run=True to preview.",
-            ),
-        )
+        backend, available, reason = self._input_backend_status()
+        if not available:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNSUPPORTED, reason),
+            )
+
+        try:
+            self._run_xdotool(["key", "--clearmodifiers", combo])
+            return action_result(ok=True, data={
+                "key": key, "modifiers": modifiers,
+                "combo": combo,
+                "method": "xdotool",
+            })
+        except subprocess.CalledProcessError as exc:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNKNOWN, f"xdotool key failed: {exc.stderr}"),
+            )
 
     async def scroll(
         self, direction: str, amount: int = 500, *,
         dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Scroll in a direction via AT-SPI2 scrollable interface.
+        """Scroll in a direction via xdotool mouse button simulation.
 
-        .. warning::
+        Maps directions to X11 mouse buttons:
+        - ``up`` → button 4
+        - ``down`` → button 5
+        - ``left`` → button 6
+        - ``right`` → button 7
 
-           The AT-SPI2 scrollable injection path is **not yet wired**.
-           Returns ``ok=False`` with an ``UNSUPPORTED`` error rather than
-           silently claiming success. ``dry_run`` still works for previewing.
+        The ``amount`` parameter controls scroll magnitude. It is scaled to a
+        bounded number of button clicks (1–10), where each click is roughly
+        equivalent to one mouse-wheel notch. The actual pixel distance depends
+        on the window manager's scroll settings.
+
+        Returns ``UNSUPPORTED`` if xdotool is not available.
         """
+        direction_norm = direction.lower().strip()
+        button_map = {"up": "4", "down": "5", "left": "6", "right": "7"}
+
+        if direction_norm not in button_map:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.VALIDATION,
+                    f"Invalid scroll direction: {direction!r}. "
+                    f"Must be one of: {', '.join(button_map)}"),
+            )
+
+        # Scale amount (0-5000) to bounded click count (1-10)
+        click_count = max(1, min(10, amount // 100))
+
         if dry_run:
             return action_result(ok=True, data={
-                "action": "scroll", "direction": direction,
-                "amount": amount, "dry_run": True,
+                "action": "scroll", "direction": direction_norm,
+                "amount": amount,
+                "click_count": click_count,
+                "dry_run": True,
             })
 
-        return action_result(
-            ok=False,
-            error=ActionError(
-                ErrorCategory.UNSUPPORTED,
-                "scroll is not yet implemented for Linux — "
-                "no AT-SPI2 scrollable injection backend is wired. "
-                "Use dry_run=True to preview.",
-            ),
-        )
+        backend, available, reason = self._input_backend_status()
+        if not available:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNSUPPORTED, reason),
+            )
+
+        try:
+            button = button_map[direction_norm]
+            # Use --repeat for bounded scroll magnitude
+            self._run_xdotool(["click", "--repeat", str(click_count), button])
+            return action_result(ok=True, data={
+                "direction": direction_norm,
+                "amount": amount,
+                "click_count": click_count,
+                "button": button,
+                "method": "xdotool",
+            })
+        except subprocess.CalledProcessError as exc:
+            return action_result(
+                ok=False,
+                error=ActionError(ErrorCategory.UNKNOWN, f"xdotool scroll failed: {exc.stderr}"),
+            )
 
     # ------------------------------------------------------------------
     # SurfaceAdapter required methods
@@ -465,6 +636,21 @@ class LinuxAdapter(SurfaceAdapter):
         """Resolve a target string to screen coordinates.
 
         Supports "x,y" format directly. Falls back to AT-SPI2 search.
+
+        .. deprecated:: Use :meth:`_resolve_point_or_none` for callers
+           that need to distinguish "resolved" from "not found."
+        """
+        point = self._resolve_point_or_none(target)
+        if point is not None:
+            return point
+        return (0.0, 0.0)
+
+    def _resolve_point_or_none(self, target: str) -> tuple[float, float] | None:
+        """Resolve a target string to screen coordinates, or None if not found.
+
+        - Direct coordinates like ``"100,200"`` are parsed immediately.
+        - Named targets are searched via AT-SPI2; returns ``None`` if the
+          element cannot be found or has no extents.
         """
         # Direct coordinates
         if "," in target:
@@ -472,14 +658,14 @@ class LinuxAdapter(SurfaceAdapter):
             try:
                 return (float(parts[0]), float(parts[1]))
             except (ValueError, IndexError):
-                pass
+                return None
 
         # Try AT-SPI2 search
         acc = self._find_accessible(target)
         if acc is not None:
             try:
                 ext = acc.get_extents(self._atspi.CoordType.SCREEN)
-                if ext:
+                if ext and ext.width > 0 and ext.height > 0:
                     return (
                         ext.x + ext.width / 2,
                         ext.y + ext.height / 2,
@@ -487,7 +673,7 @@ class LinuxAdapter(SurfaceAdapter):
             except Exception:
                 pass
 
-        return (0.0, 0.0)
+        return None
 
     # ------------------------------------------------------------------
     # Properties

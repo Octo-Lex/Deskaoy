@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from deskaoy.cascade.types import AXSnapshot
+from deskaoy.results.types import ErrorCategory
 
 # ---------------------------------------------------------------------------
 # Fixtures: mock AT-SPI2 modules
@@ -201,7 +202,8 @@ class TestLinuxAdapterClick:
         result = asyncio.run(adapter.click("OK"))
         assert result.ok is True
 
-    def test_click_coordinate_fallback(self):
+    def test_click_coordinate_fallback_unsupported_without_xdotool(self):
+        """Without xdotool, coordinate click must return UNSUPPORTED."""
         LinuxAdapter = _import_adapter()
         adapter = LinuxAdapter()
         adapter._ensure_imports()
@@ -211,9 +213,10 @@ class TestLinuxAdapterClick:
         desktop.get_child_count.return_value = 0
         adapter._atspi.get_desktop.return_value = desktop
 
-        result = asyncio.run(adapter.click("100,200"))
-        assert result.ok is True
-        assert result.data.get("method") == "coordinate"
+        with patch("shutil.which", return_value=None):
+            result = asyncio.run(adapter.click("100,200"))
+        assert result.ok is False
+        assert result.error.category == ErrorCategory.UNSUPPORTED
 
 
 class TestLinuxAdapterFill:
@@ -227,19 +230,14 @@ class TestLinuxAdapterFill:
         assert result.data.get("dry_run") is True
 
     def test_fill_returns_unsupported(self):
-        """fill delegates to type_text which is not yet implemented."""
+        """fill returns unsupported when xdotool is not available."""
         LinuxAdapter = _import_adapter()
         adapter = LinuxAdapter()
-        adapter._ensure_imports()
 
-        desktop = MagicMock()
-        desktop.get_name.return_value = "Desktop"
-        desktop.get_child_count.return_value = 0
-        adapter._atspi.get_desktop.return_value = desktop
-
-        result = asyncio.run(adapter.fill("field", "hello"))
-        # fill calls type_text which is unsupported — must fail honestly
+        with patch("shutil.which", return_value=None):
+            result = asyncio.run(adapter.fill("field", "hello"))
         assert result.ok is False
+        assert result.error.category == ErrorCategory.UNSUPPORTED
         assert "unsupported" in str(result.error.category).lower()
 
 
@@ -254,10 +252,11 @@ class TestLinuxAdapterTypeText:
         assert result.data.get("dry_run") is True
 
     def test_type_text_returns_unsupported(self):
-        """type_text is not yet implemented — must fail honestly."""
+        """type_text returns unsupported when xdotool is not available."""
         LinuxAdapter = _import_adapter()
         adapter = LinuxAdapter()
-        result = asyncio.run(adapter.type_text("hello"))
+        with patch("shutil.which", return_value=None):
+            result = asyncio.run(adapter.type_text("hello"))
         assert result.ok is False
 
 
