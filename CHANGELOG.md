@@ -4,6 +4,57 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
+## [2.0.1] — 2026-06-28
+
+### Highlights
+
+**Stabilization and post-release hardening.** This patch release completes
+the post-v2.0.0 hardening milestone: hermetic desktop integration restored,
+Windows test hermeticity fixed, ruff baseline sharply reduced, real Linux
+input injection implemented, and macOS permission probes added.
+
+### Added
+- Hermetic desktop integration tests re-enabled in CI (dry-run, policy-deny,
+  receipts, CLI goal-capture).
+- Real Linux input injection for X11 sessions via xdotool (click, type_text,
+  key_press, scroll, fill).
+- macOS Accessibility and Screen Recording permission probes — input methods
+  now fail with `ErrorCategory.SECURITY` when permissions are missing, instead
+  of silently dropping events.
+- macOS key blocklist enforcement in `key_press` (was missing).
+- Real-hardware macOS validation script (`scripts/validate_macos_adapter.py`).
+- `ErrorCategory.UNSUPPORTED` added to error taxonomy.
+- `build>=1.0` added to `[dev]` extra.
+
+### Changed
+- Reduced ruff baseline from 875 to 95 findings. Eliminated F401 unused-import
+  findings entirely.
+- Windows `test_action_first.py` now runs hermetically without pre-generated
+  comtypes type libraries (38 tests, no `GITHUB_ACTIONS` skip needed).
+- Improved mypy baseline from 172 to 161 errors.
+- Linux adapter now returns `SELECTOR_NOT_FOUND` for unresolved named targets
+  before any xdotool call (previously clicked `(0,0)`).
+- Linux `scroll` amount now scales to bounded `--repeat` counts (1–10).
+- Debug logs redact typed user data in xdotool args.
+
+### Fixed
+- `delegator.py`: `browser_session` → `session` (stale browser-era reference).
+- `repl.py`: missing `from typing import Any`.
+- `taskbar_service.py`: missing `win32api` import.
+- macOS `fill()` now propagates `type_text` failure instead of claiming success.
+- macOS `screenshot()` raises `PermissionError` instead of returning `None`.
+- CLI `execute --capability` now honors the capability flag with schema-aware
+  parameter mapping.
+- CLI `schedule due` fixed: `r.instruction` → `r.prompt`.
+- CLI storage path delegates to `StorageResolver`.
+- `__init__.py` public API re-exports declared via `__all__`.
+
+### Platform notes
+- **Linux**: X11 + xdotool input supported. Wayland remains unsupported.
+- **macOS**: experimental, opt-in via `DESKTOP_AGENT_MACOS=1`. Gate removal
+  pending real-device validation evidence.
+- **Windows**: UIA tests no longer depend on pre-generated comtypes type libraries.
+
 ## [2.0.0] — 2026-06-27
 
 ### Highlights

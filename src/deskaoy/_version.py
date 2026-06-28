@@ -25,7 +25,7 @@ PACKAGE_NAME = "deskaoy"
 
 # Hardcoded fallback used when the package is not installed (raw source
 # checkout). Must stay in sync with [project].version in pyproject.toml.
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 
 
 def resolve_version() -> str:
