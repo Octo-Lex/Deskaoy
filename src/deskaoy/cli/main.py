@@ -612,186 +612,81 @@ async def _cmd_status(args: argparse.Namespace) -> int:
 
 
 async def _cmd_doctor(args: argparse.Namespace) -> int:
-    """Diagnose environment setup issues.
+    """Platform diagnostic — exposes adapter readiness, permissions, and deps.
 
-    Checks:
-    1. Python version >= 3.11
-    2. Package installed and importable
-    3. Storage directory writable
-    4. Surface adapter available (Windows/Browser)
-    5. Optional dependencies (browser, LLM, grounding)
+    Uses the diagnostics module (side-effect-free checks). Supports --json
+    for machine-readable output and --verbose for full detail.
     """
-    import importlib
-    import os
+    import json as json_mod
     import platform
     import sys
 
-    issues = 0
-    checks = []
+    from deskaoy.diagnostics import run_doctor
 
-    # Check 1: Python version
-    py_ver = sys.version_info
-    py_ok = py_ver >= (3, 11)
-    checks.append(("Python >= 3.11", py_ok, f"{py_ver.major}.{py_ver.minor}.{py_ver.micro}"))
-    if not py_ok:
-        issues += 1
+    result = run_doctor()
 
-    # Check 2: Package importable
-    try:
-        import deskaoy
-        checks.append(("deskaoy importable", True, deskaoy.__file__))
-    except ImportError as e:
-        checks.append(("deskaoy importable", False, str(e)))
-        issues += 1
-
-    # Check 3: Storage directory writable
-    from deskaoy.storage import StorageResolver
-    storage = StorageResolver()
-    try:
-        base_dir = storage.resolve_action_memory()
-        os.makedirs(base_dir, exist_ok=True)
-        test_file = os.path.join(base_dir, ".doctor_test")
-        with open(test_file, "w") as f:
-            f.write("ok")
-        os.remove(test_file)
-        checks.append(("Storage writable", True, base_dir))
-    except Exception as e:
-        checks.append(("Storage writable", False, str(e)))
-        issues += 1
-
-    # Check 4: Surface adapter
-    system = platform.system()
-    if system == "Windows":
-        try:
-            import comtypes  # noqa: F401
-            checks.append(("Windows adapter (comtypes)", True, "available"))
-        except ImportError:
-            checks.append(("Windows adapter (comtypes)", False, "install: pip install comtypes"))
-            issues += 1
-    elif system == "Darwin":
-        checks.append(("macOS adapter", False, "not yet implemented (BATCH-05)"))
+    if getattr(args, "json", False):
+        print(json_mod.dumps(result, indent=2))
+        return 1 if result["status"] == "FAIL" else 0
     else:
-        checks.append(("Linux adapter", False, "not yet implemented (BATCH-06)"))
+        # Human-readable output
+        print(f"\ndeskaoy {_VERSION} — Platform Diagnostic\n")
+        print(f"  Platform: {platform.system()} {platform.release()}")
+        print(f"  Python:   {sys.version.split()[0]}\n")
 
-    # Check 5: Optional dependencies
-    # Browser
-    try:
-        import patchright  # noqa: F401
-        checks.append(("Browser (patchright)", True, "installed"))
-    except ImportError:
-        checks.append(("Browser (patchright)", False, "install: pip install deskaoy[browser]"))
+        verbose = getattr(args, "verbose", False)
 
-    # LLM
-    llm_available = False
-    for pkg in ("openai", "anthropic"):
-        try:
-            importlib.import_module(pkg)
-            llm_available = True
-        except ImportError:
-            pass
-    if llm_available:
-        checks.append(("LLM client", True, "installed"))
-    else:
-        checks.append(("LLM client", False, "install: pip install deskaoy[llm]"))
+        current_section = ""
+        for check in result["checks"]:
+            name = check["name"]
+            status = check["status"]
+            detail = check["detail"]
 
-    # Grounding
-    try:
-        import ultralytics  # noqa: F401
-        checks.append(("Visual grounding", True, "installed"))
-    except ImportError:
-        checks.append(("Visual grounding", False, "install: pip install deskaoy[grounding]"))
+            # Section headers based on check name prefixes
+            section = ""
+            if name.startswith(("Package", "Version", "Storage")):
+                section = "Deskaoy"
+            elif name.startswith(("OS", "Python", "Architecture")):
+                section = "Platform"
+            elif any(name.startswith(p) for p in ("Windows:", "Linux:", "macOS:")):
+                section = "Adapter Readiness"
+            elif name.startswith(("LLM", "Visual", "Pillow", "OpenTelemetry")):
+                section = "Optional Dependencies"
+            elif name.startswith(("Key", "Sensitive")):
+                section = "Safety"
+            elif name.startswith(("macOS adapter", "Wayland", "Remaining")):
+                section = "Known Limitations"
 
-    # Check 6: MCP transport
-    try:
-        import mcp  # noqa: F401
-        checks.append(("MCP transport", True, "installed"))
-    except ImportError:
-        checks.append(("MCP transport", False, "install: pip install deskaoy[mcp]"))
+            if section != current_section:
+                if section:
+                    print(f"\n  ── {section} ──")
+                current_section = section
 
-    # Check 7: REST transport
-    try:
-        import aiohttp  # noqa: F401
-        checks.append(("REST transport", True, "installed"))
-    except ImportError:
-        checks.append(("REST transport", False, "install: pip install deskaoy[rest]"))
+            icon = {
+                "PASS": "[OK]  ",
+                "WARN": "[WARN]",
+                "FAIL": "[FAIL]",
+                "SKIP": "[SKIP]",
+            }.get(status, "[?]   ")
 
-    # Check 8: Safety modules
-    try:
-        from deskaoy.safety.key_blocklist import BLOCKED_KEYS
-        checks.append(("Key blocklist", True, f"{len(BLOCKED_KEYS)} keys blocked"))
-    except ImportError:
-        checks.append(("Key blocklist", False, "import error"))
-        issues += 1
-    try:
-        from deskaoy.safety.sensitive_apps import SENSITIVE_APPS
-        checks.append(("Sensitive apps", True, f"{len(SENSITIVE_APPS)} apps monitored"))
-    except ImportError:
-        checks.append(("Sensitive apps", False, "import error"))
-        issues += 1
+            # Show detail for non-PASS or verbose
+            if status != "PASS" or verbose:
+                print(f"  {icon} {name:40s} {detail}")
+            else:
+                print(f"  {icon} {name}")
 
-    # Check 9: Image support
-    try:
-        import PIL  # noqa: F401
-        checks.append(("Pillow (images)", True, "installed"))
-    except ImportError:
-        checks.append(("Pillow (images)", False, "install: pip install Pillow"))
+        summary = result["summary"]
+        print("\n  ── Summary ──")
+        print(f"  {summary['pass']} passed, {summary['warn']} warnings, "
+              f"{summary['fail']} failures, {summary['skip']} skipped")
 
-    # Check 10: Process utilities
-    try:
-        import psutil  # noqa: F401
-        checks.append(("Process utilities", True, "installed"))
-    except ImportError:
-        checks.append(("Process utilities", False, "install: pip install psutil"))
+        if result["status"] == "FAIL":
+            print("\n  ✗ Hard failures detected.\n")
+            return 1
+        else:
+            print("\n  ✓ Environment is usable.\n")
+            return 0
 
-    # Check 11: Screenshot support
-    screenshot_ok = False
-    for mod_name in ("mss", "PIL.ImageGrab"):
-        try:
-            importlib.import_module(mod_name)
-            screenshot_ok = True
-            break
-        except ImportError:
-            pass
-    checks.append(("Screenshot capture", screenshot_ok, "available" if screenshot_ok else "install mss or Pillow"))
-
-    # Check 12: Rate governor
-    try:
-        from deskaoy.safety.rate_governor import ActionRateGovernor
-        gov = ActionRateGovernor()
-        checks.append(("Rate governor", True, f"{len(gov._limits)} action types"))
-    except ImportError:
-        checks.append(("Rate governor", False, "import error"))
-        issues += 1
-
-    # Check 13: Validation module
-    try:
-        from deskaoy.validation import validate_instruction  # noqa: F401
-        checks.append(("Instruction validation", True, "available"))
-    except ImportError:
-        checks.append(("Instruction validation", False, "import error"))
-
-    # Check 14: Cascade engine
-    try:
-        from deskaoy.cascade.protocol import SurfaceAdapter  # noqa: F401
-        checks.append(("Cascade engine", True, "SurfaceAdapter protocol"))
-    except ImportError:
-        checks.append(("Cascade engine", False, "import error"))
-        issues += 1
-
-    # Print results
-    print(f"\ndeskaoy {_VERSION} -- Environment Diagnostic\n")
-    print(f"  Platform: {platform.system()} {platform.release()}")
-    print(f"  Python:   {sys.version.split()[0]}\n")
-    for label, ok, detail in checks:
-        icon = "[OK]" if ok else "[FAIL]"
-        print(f"  {icon} {label:30s} {detail}")
-    print()
-    if issues == 0:
-        print("  All checks passed. Ready to go.\n")
-        return 0
-    else:
-        print(f"  {issues} issue(s) found. Fix above to proceed.\n")
-        return 1
 
 
 async def _cmd_release_check(args: argparse.Namespace) -> int:
@@ -1081,7 +976,9 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("describe", help="Print universal discovery document (identity + capabilities + schemas)")
     sub.add_parser("schema", help="Print capability schema (alias for describe)")
     sub.add_parser("version", help="Print version")
-    sub.add_parser("doctor", help="Diagnose environment setup issues")
+    p_doctor = sub.add_parser("doctor", help="Platform diagnostic — adapter readiness, permissions, deps")
+    p_doctor.add_argument("--json", action="store_true", help="Output JSON for bug reports/CI")
+    p_doctor.add_argument("--verbose", action="store_true", help="Show full detail for all checks")
     sub.add_parser("release-check", help="release readiness check")
     sub.add_parser("status", help="Show configured subsystems and dependencies")
 
