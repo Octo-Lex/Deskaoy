@@ -67,11 +67,32 @@ backend remains future work.
 
 `dry_run=True` always works for previewing without subprocess invocation.
 
-### 4. macOS adapter experimental
+### 4. macOS adapter — experimental with permission probes (pending hardware validation)
 
 The macOS adapter (`MacOSAdapter`) has real CGEvent/Quartz implementations
-but is **experimental** — untested without macOS hardware. The factory
+but is **experimental** — untested on real macOS hardware. The factory
 requires explicit opt-in via `DESKTOP_AGENT_MACOS=1`.
+
+**Batch 11 improvements:**
+- Added explicit permission probes: `_check_accessibility_permission()`
+  (required for CGEvent injection) and `_check_screen_recording_permission()`
+  (required for screenshots). All input methods now fail honestly with
+  `ErrorCategory.SECURITY` when permissions are missing, rather than silently
+  dropping events.
+- Added key blocklist enforcement to `key_press` (was missing).
+- Added `fill()` permission check before click (no partial side effects).
+- Created `scripts/validate_macos_adapter.py` — a hardware validation script
+  that tests construction, permissions, screenshots, input injection, key
+  blocklist, and dry-run paths on a real macOS machine.
+
+**Gate removal criteria** (not yet met):
+- Hardware validation script must pass on at least one macOS version
+- All input methods must produce observable desktop actions
+- Permission failure paths must be verified
+- `_char_to_keycode` needs a real character-to-keycode mapping (currently
+  returns 0 for all characters — a known limitation)
+- Named target resolution needs implementation (currently falls back to
+  window center without returning None for unresolved targets)
 
 ### 5. Mypy baseline (non-blocking)
 
