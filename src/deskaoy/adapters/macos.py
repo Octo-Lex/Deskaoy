@@ -104,6 +104,54 @@ class MacOSAdapter(SurfaceAdapter):
             ) from None
 
     # =================================================================
+    # Permission Probes
+    # =================================================================
+
+    def _check_accessibility_permission(self) -> bool:
+        """Check whether the process has Accessibility permission.
+
+        macOS requires Accessibility permission for CGEvent input injection.
+        Without it, ``CGEventPost`` succeeds syntactically but the event is
+        silently dropped — this is a common source of false success.
+        """
+        self._ensure_imports()
+        return bool(self._app_services.AXIsProcessTrusted())
+
+    def _check_screen_recording_permission(self) -> bool:
+        """Check whether the process has Screen Recording permission.
+
+        macOS requires Screen Recording permission for ``CGWindowListCreateImage``
+        to return actual screen content. Without it, the screenshot will be
+        blank or contain only a wallpaper.
+        """
+        self._ensure_imports()
+        # CGPreflightScreenCaptureAccess / CGRequestScreenCaptureAccess are
+        # available on macOS 10.15+. Pre-flight returns True if already granted.
+        try:
+            preflight = self._quartz.CGPreflightScreenCaptureAccess
+            return bool(preflight())
+        except AttributeError:
+            # Older macOS — assume permission is available
+            return True
+
+    def _require_accessibility(self) -> ActionResult | None:
+        """Return an error result if Accessibility permission is missing.
+
+        Returns ``None`` if permission is granted.
+        """
+        if not self._check_accessibility_permission():
+            return action_result(
+                ok=False,
+                error=ActionError(
+                    ErrorCategory.SECURITY,
+                    "macOS Accessibility permission not granted. "
+                    "CGEvent input injection will be silently dropped. "
+                    "Grant permission in System Settings > Privacy & Security > Accessibility.",
+                ),
+            )
+        return None
+
+    # =================================================================
     # AXUIElement Management
     # =================================================================
 
@@ -160,8 +208,18 @@ class MacOSAdapter(SurfaceAdapter):
         """Capture a screenshot using CGWindowListCreateImage.
 
         Captures the target window only (not full screen).
+
+        Raises ``PermissionError`` if Screen Recording permission is missing
+        (screenshot would be blank without it).
         """
         self._ensure_imports()
+
+        if not self._check_screen_recording_permission():
+            raise PermissionError(
+                "macOS Screen Recording permission not granted. "
+                "Screenshots will be blank. "
+                "Grant in System Settings > Privacy & Security > Screen Recording."
+            )
 
         rect = self._get_window_bounds()
         x, y, w, h = rect
@@ -243,6 +301,8 @@ class MacOSAdapter(SurfaceAdapter):
     ) -> ActionResult:
         """Click on a target element using CGEvent mouse events.
 
+        Requires Accessibility permission for CGEvent injection.
+
         Target can be:
           - Coordinates as "x,y" string
           - AX element name resolved via accessibility tree
@@ -253,6 +313,10 @@ class MacOSAdapter(SurfaceAdapter):
             return action_result(ok=True, data={
                 "action": "click", "target": target, "dry_run": True,
             })
+
+        perm_error = self._require_accessibility()
+        if perm_error is not None:
+            return perm_error
 
         try:
             point = self._resolve_target(target)
@@ -284,7 +348,8 @@ class MacOSAdapter(SurfaceAdapter):
     ) -> ActionResult:
         """Fill a text field — click + type.
 
-        Clicks on the target, then types the value using CGEvent.
+        Requires Accessibility permission for CGEvent injection.
+        Checks permission before any click to prevent partial side effects.
         """
         self._ensure_imports()
 
@@ -294,13 +359,20 @@ class MacOSAdapter(SurfaceAdapter):
                 "value": value, "dry_run": True,
             })
 
+        perm_error = self._require_accessibility()
+        if perm_error is not None:
+            return perm_error
+
         try:
             click_result = await self.click(target)
             if not click_result.ok:
                 return click_result
 
             await asyncio.sleep(0.05)
-            await self.type_text(value)
+            type_result = await self.type_text(value)
+            if not type_result.ok:
+                return type_result
+
             return action_result(ok=True, data={"value": value})
         except Exception as exc:
             return action_result(
@@ -314,7 +386,8 @@ class MacOSAdapter(SurfaceAdapter):
     ) -> ActionResult:
         """Type text using CGEvent keyboard events.
 
-        Sends individual key events for each character via CGEvent.
+        Requires Accessibility permission. Sends individual key events for
+        each character via CGEvent.
         """
         self._ensure_imports()
 
@@ -322,6 +395,10 @@ class MacOSAdapter(SurfaceAdapter):
             return action_result(ok=True, data={
                 "action": "type_text", "char_count": len(text), "dry_run": True,
             })
+
+        perm_error = self._require_accessibility()
+        if perm_error is not None:
+            return perm_error
 
         try:
             for ch in text:
@@ -350,6 +427,8 @@ class MacOSAdapter(SurfaceAdapter):
     ) -> ActionResult:
         """Press a key with optional modifiers using CGEvent.
 
+        Requires Accessibility permission for CGEvent injection.
+
         Modifiers bitmask:
           - 1: Alt (Option)
           - 2: Ctrl (Command on macOS)
@@ -358,11 +437,38 @@ class MacOSAdapter(SurfaceAdapter):
         """
         self._ensure_imports()
 
+        # SECURITY: Check key blocklist before permission/execution
+        from deskaoy.safety.key_blocklist import block_reason, is_blocked_key
+        combo = key
+        mod_names: list[str] = []
+        if modifiers & 1:
+            mod_names.append("alt")
+        if modifiers & 2:
+            mod_names.append("ctrl")
+        if modifiers & 4:
+            mod_names.append("shift")
+        if modifiers & 8:
+            mod_names.append("super")
+        if mod_names:
+            combo = "+".join(mod_names) + "+" + key
+        if is_blocked_key(combo):
+            return action_result(
+                ok=False,
+                error=ActionError(
+                    ErrorCategory.SECURITY,
+                    f"Blocked key combo: {combo} — {block_reason(combo)}",
+                ),
+            )
+
         if dry_run:
             return action_result(ok=True, data={
                 "action": "key_press", "key": key,
                 "modifiers": modifiers, "dry_run": True,
             })
+
+        perm_error = self._require_accessibility()
+        if perm_error is not None:
+            return perm_error
 
         try:
             key_code = self._key_to_keycode(key)
@@ -404,7 +510,10 @@ class MacOSAdapter(SurfaceAdapter):
         self, direction: str, amount: int = 500, *,
         dry_run: bool = False, **kwargs: Any,
     ) -> ActionResult:
-        """Scroll using CGEvent scroll wheel events."""
+        """Scroll using CGEvent scroll wheel events.
+
+        Requires Accessibility permission for CGEvent injection.
+        """
         self._ensure_imports()
 
         if dry_run:
@@ -412,6 +521,10 @@ class MacOSAdapter(SurfaceAdapter):
                 "action": "scroll", "direction": direction,
                 "amount": amount, "dry_run": True,
             })
+
+        perm_error = self._require_accessibility()
+        if perm_error is not None:
+            return perm_error
 
         try:
             scroll_units = amount // 10
