@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "deskaoy"
-version = "2.0.1"
+version = "2.1.0"
 description = "Surface-agnostic desktop agent for the AI Operating System â€” perceives any screen, acts on any element, recovers from failures autonomously."
 readme = "README.md"
 license = "MIT"

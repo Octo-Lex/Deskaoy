@@ -4,6 +4,46 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
+## [2.1.0] — 2026-06-29
+
+### Highlights
+
+**Platform diagnostics and readiness.** This release adds the `deskaoy doctor`
+command for platform self-diagnosis, documents the Wayland input injection
+strategy, and ships all post-release hardening from v2.0.1.
+
+### Added
+- **`deskaoy doctor`** — side-effect-free platform diagnostic command that
+  reports adapter readiness, permissions, dependencies, and known limitations.
+  Supports `--json` for machine-readable output and `--verbose` for full detail.
+- **Wayland input strategy** — `docs/wayland-input-strategy.md` documents the
+  XDG RemoteDesktop portal + libei/EIS path as the preferred future backend.
+  `deskaoy doctor` reports portal and libei availability on Wayland sessions.
+- **macOS permission probes** — Accessibility and Screen Recording permission
+  checks that fail honestly instead of silently dropping events.
+- **macOS validation script** — `scripts/validate_macos_adapter.py` for
+  real-hardware validation (does not run in CI).
+- **Linux X11 input injection** — real click, type_text, key_press, scroll,
+  and fill via xdotool on X11 sessions.
+- **Hermetic desktop integration tests** — 10 tests exercising dry-run,
+  policy-deny, receipts, and CLI goal-capture in CI.
+- **Windows comtypes hermeticity** — `test_action_first.py` runs without
+  pre-generated type libraries (38 tests).
+
+### Changed
+- Ruff baseline reduced from 875 to 95 findings. F401 eliminated.
+- Mypy baseline improved from 172 to 161 errors.
+- Linux adapter returns `SELECTOR_NOT_FOUND` for unresolved named targets.
+- Linux `scroll` amount scales to bounded `--repeat` counts (1–10).
+- Debug logs redact typed user data in xdotool args.
+
+### Platform notes
+- **Linux**: X11 + xdotool input supported. Wayland explicitly unsupported
+  (strategy documented).
+- **macOS**: experimental, opt-in via `DESKTOP_AGENT_MACOS=1`. Gate removal
+  pending real-device validation (moved to v2.2.0 milestone).
+- **Windows**: UIA tests hermetic without comtypes type libraries.
+
 ## [2.0.1] — 2026-06-28
 
 ### Highlights
