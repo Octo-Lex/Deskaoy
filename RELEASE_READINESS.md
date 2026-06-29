@@ -61,9 +61,15 @@ no xdotool), they return `ErrorCategory.UNSUPPORTED`.
 
 `type_text`, `key_press`, `scroll`, and `fill` all require X11 + xdotool.
 
-Wayland remains unsupported — global input injection on Wayland is
-compositor/portal-dependent and cannot be done generically. AT-SPI2 portal
-backend remains future work.
+Wayland remains **unsupported** — global input injection on Wayland is
+compositor/portal-dependent and cannot be done generically. All input methods
+return `ErrorCategory.UNSUPPORTED` on Wayland sessions.
+
+The future implementation path is the **XDG RemoteDesktop portal + libei/EIS**,
+which provides consent-aware, session-based input injection. See
+`docs/wayland-input-strategy.md` for the full strategy and backend decision
+record. `deskaoy doctor` now reports portal and libei availability on Wayland
+sessions (informational WARN, not FAIL).
 
 `dry_run=True` always works for previewing without subprocess invocation.
 

@@ -311,6 +311,96 @@ def _check_adapter_readiness() -> list[CheckResult]:
                 "Linux: AT-SPI2 (accessibility tree)", Status.WARN,
                 "install: sudo apt install python3-atspi"))
 
+        # Wayland portal detection (side-effect-free: only checks for D-Bus service files)
+        if session_type == "wayland":
+            portal_results = _detect_wayland_portal()
+            results.extend(portal_results)
+
+    return results
+
+
+# Default D-Bus service directories searched by _detect_wayland_portal.
+_DEFAULT_PORTAL_DIRS: list[str] = [
+    "/usr/share/dbus-1/services",
+    "/usr/local/share/dbus-1/services",
+]
+
+
+def _detect_wayland_portal(
+    service_dirs: list[str] | None = None,
+) -> list[CheckResult]:
+    """Detect XDG RemoteDesktop portal availability on Wayland (side-effect-free).
+
+    Checks for the presence of portal service D-Bus files without connecting
+    to D-Bus or creating sessions. This is informational only — having the
+    portal service installed does not mean input injection is supported yet.
+
+    Args:
+        service_dirs: override the D-Bus service directories to scan (for testing).
+    """
+    results: list[CheckResult] = []
+    from pathlib import Path
+
+    if service_dirs is None:
+        service_dirs = _DEFAULT_PORTAL_DIRS + [str(Path.home() / ".local/share/dbus-1/services")]
+
+    # Main portal service file name
+    PORTAL_MAIN = "org.freedesktop.portal.Desktop.service"
+    # Backend implementation service file prefixes
+    BACKEND_PREFIX = "org.freedesktop.impl.portal.desktop."
+    BACKEND_NAMES = {
+        "gnome": "GNOME",
+        "kde": "KDE",
+        "wlr": "wlroots",
+        "wlroots": "wlroots",
+        "hyprland": "Hyprland",
+    }
+
+    portal_found = False
+    portal_backend: str | None = None
+
+    for dir_path in service_dirs:
+        d = Path(dir_path)
+        if not d.exists():
+            continue
+        for svc in d.glob("*.service"):
+            name = svc.name
+            if name == PORTAL_MAIN:
+                portal_found = True
+            if name.startswith(BACKEND_PREFIX):
+                portal_found = True
+                # Extract backend name from the service file
+                backend_key = name[len(BACKEND_PREFIX):].replace(".service", "").lower()
+                for key, label in BACKEND_NAMES.items():
+                    if key in backend_key:
+                        portal_backend = label
+                        break
+
+    if portal_found:
+        backend_msg = f"portal detected (backend: {portal_backend})" if portal_backend else "portal detected"
+        results.append(CheckResult(
+            "Linux: XDG RemoteDesktop portal", Status.WARN,
+            f"{backend_msg} — not yet implemented. See docs/wayland-input-strategy.md",
+        ))
+    else:
+        results.append(CheckResult(
+            "Linux: XDG RemoteDesktop portal", Status.WARN,
+            "not detected — input injection on Wayland requires xdg-desktop-portal",
+        ))
+
+    # Check for libei (Python bindings not widely available yet)
+    try:
+        import libei  # type: ignore[import-not-found]  # noqa: F401
+        results.append(CheckResult(
+            "Linux: libei (EIS input)", Status.WARN,
+            "installed — future backend for portal-based input",
+        ))
+    except ImportError:
+        results.append(CheckResult(
+            "Linux: libei (EIS input)", Status.SKIP,
+            "not installed — required for ConnectToEIS portal path",
+        ))
+
     return results
 
 
